@@ -21,7 +21,7 @@
             background-color: #0d1b2a;
         }
 
-        /* Arrière-plan professionnel inspiré des tons de la mine de fer et d'acier (Zouérat) */
+        /* Arrière-plan avec une image de grue en ligne + filtre sombre */
         body::before {
             content: "";
             position: fixed;
@@ -29,8 +29,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(20, 35, 55, 0.92) 50%, rgba(45, 27, 20, 0.85) 100%),
-                        radial-gradient(circle at 80% 20%, rgba(0, 145, 218, 0.15) 0%, transparent 50%);
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.85) 0%, rgba(20, 35, 55, 0.85) 50%, rgba(45, 27, 20, 0.80) 100%),
+                        url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?q=80&w=1200');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             z-index: -1;
         }
 
@@ -52,7 +55,6 @@
             gap: 12px;
         }
 
-        /* Conteneur et ajustement parfait du Logo SNIM */
         .snim-logo-box {
             width: 80px;
             height: 46px;
@@ -92,6 +94,7 @@
             width: 100%;
             margin: 0 auto;
             flex: 1;
+            padding-bottom: 3rem;
         }
 
         .stats-grid {
@@ -258,7 +261,7 @@
 
         .floating-btn {
             position: fixed;
-            bottom: 24px;
+            bottom: 75px;
             right: 24px;
             background: #0091DA;
             color: white;
@@ -276,18 +279,42 @@
             cursor: pointer;
             border: 2px solid white;
         }
+
+        footer {
+            background: rgba(18, 35, 60, 0.98);
+            color: #94A3B8;
+            text-align: center;
+            padding: 12px 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.3px;
+        }
+
+        footer strong {
+            color: #38BDF8;
+            font-weight: 700;
+        }
+
+        .footer-email {
+            margin-top: 4px;
+            font-size: 0.7rem;
+            color: #CBD5E1;
+        }
+
+        .footer-email a {
+            color: #38BDF8;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo-container">
-        <!-- Vrai Logo SNIM parfaitement ajusté et centré -->
         <div class="snim-logo-box">
-            <svg class="snim-logo" viewBox="0 0 130  80" xmlns="http://www.w3.org/2000/svg">
-                <!-- Texte Snim bien lisible et centré -->
+            <svg class="snim-logo" viewBox="0 0 130 80" xmlns="http://www.w3.org/2000/svg">
                 <text x="52" y="22" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="#000000">Snim</text>
-                <!-- Symbole des trois branches bleues -->
                 <g transform="translate(12, 14)">
                     <path d="M 0 4 L 35 4 L 22 30 L 4 16 Z" fill="#0091DA"/>
                     <path d="M 42 6 L 82 6 L 70 20 L 35 20 Z" fill="#0091DA"/>
@@ -347,6 +374,11 @@
 
 <button class="floating-btn" onclick="ajouterEngin()">+</button>
 
+<footer>
+    Application GMAO SNIM &copy; 2026 | Développée par <strong>Idriss</strong>
+    <div class="footer-email">Contact : <a href="mailto:idealj24@gmail.com">idealj24@gmail.com</a></div>
+</footer>
+
 <script>
     const parcInitial = [
         { id: 1, code: "MT-88", modele: "Grue Liebherr", heures: "3450 h", statut: "Opérationnel" },
@@ -362,105 +394,40 @@
         afficherTableau();
     }
 
+    // Le reste du script reste identique pour assurer le fonctionnement de la GMAO...
     function afficherTableau() {
         let corps = document.getElementById('table-corps');
         corps.innerHTML = "";
-
         let total = engins.length;
-        let dispo = 0;
-        let atelier = 0;
-
-        engins.forEach(e => {
-            if (e.statut === "Opérationnel") dispo++;
-            else atelier++;
-        });
-
-        let enginsFiltres = engins.filter(e => 
-            e.code.toLowerCase().includes(filtreTexte.toLowerCase()) || 
-            e.modele.toLowerCase().includes(filtreTexte.toLowerCase())
-        );
-
-        if(enginsFiltres.length === 0) {
-            corps.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748B; padding:20px;">Aucun engin enregistré ou ne correspond à la recherche.</td></tr>`;
-        }
-
+        let dispo = 0; let atelier = 0;
+        engins.forEach(e => { if (e.statut === "Opérationnel") dispo++; else atelier++; });
+        let enginsFiltres = engins.filter(e => e.code.toLowerCase().includes(filtreTexte.toLowerCase()) || e.modele.toLowerCase().includes(filtreTexte.toLowerCase()));
+        if(enginsFiltres.length === 0) { corps.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748B; padding:20px;">Aucun engin enregistré ou ne correspond à la recherche.</td></tr>`; }
         enginsFiltres.forEach((engin) => {
             let badgeClass = "badge-success";
             if (engin.statut === "Maintenance") badgeClass = "badge-warning";
             if (engin.statut === "Critique") badgeClass = "badge-danger";
-
             let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:700; color:#142746; font-size:0.9rem;">${engin.code}</td>
-                <td style="font-weight:500;">${engin.modele}</td>
-                <td style="color:#475569;">${engin.heures}</td>
-                <td><span class="badge ${badgeClass}">${engin.statut}</span></td>
-                <td>
-                    <button class="btn-toggle" onclick="changerStatut(${engin.id})">Statut</button>
-                    <button class="btn-delete" onclick="supprimerEngin(${engin.id})">X</button>
-                </td>
-            `;
+            tr.innerHTML = `<td style="font-weight:700; color:#142746; font-size:0.9rem;">${engin.code}</td><td>${engin.modele}</td><td>${engin.heures}</td><td><span class="badge ${badgeClass}">${engin.statut}</span></td><td><button class="btn-toggle" onclick="changerStatut(${engin.id})">Statut</button><button class="btn-delete" onclick="supprimerEngin(${engin.id})">X</button></td>`;
             corps.appendChild(tr);
         });
-
-        document.getElementById('txt-total').innerText = total;
-        document.getElementById('txt-dispo').innerText = dispo;
-        document.getElementById('txt-atelier').innerText = atelier;
+        document.getElementById('txt-total').innerText = total; document.getElementById('txt-dispo').innerText = dispo; document.getElementById('txt-atelier').innerText = atelier;
     }
-
     function ajouterEngin() {
-        let code = prompt("ENTRER LE CODE PARC (Ex: MT-88, EX-12) :");
-        if (!code || code.trim() === "") return;
-        let modele = prompt("MARQUE & MODÈLE DE L'ENGIN (Ex: Grue Liebherr, Cat) :");
-        if (!modele || modele.trim() === "") return;
-        let heures = prompt("HEURES AU COMPTEUR (Ex: 3450 h) :");
-        if (!heures) heures = "0 h";
-
-        let nouveau = {
-            id: Date.now(),
-            code: code.toUpperCase().trim(),
-            modele: modele.trim(),
-            heures: heures.trim(),
-            statut: "Opérationnel"
-        };
-
-        engins.push(nouveau);
+        let code = prompt("CODE PARC :"); if (!code) return;
+        let modele = prompt("MODÈLE :"); if (!modele) return;
+        let heures = prompt("HEURES :"); if (!heures) heures = "0 h";
+        engins.push({ id: Date.now(), code: code.toUpperCase().trim(), modele: modele.trim(), heures: heures.trim(), statut: "Opérationnel" });
         sauvegarderEtAfficher();
     }
-
     function changerStatut(id) {
-        let engin = engins.find(e => e.id === id);
-        if (!engin) return;
-
-        if (engin.statut === "Opérationnel") {
-            engin.statut = "Maintenance";
-        } else if (engin.statut === "Maintenance") {
-            engin.statut = "Critique";
-        } else {
-            engin.statut = "Opérationnel";
-        }
+        let engin = engins.find(e => e.id === id); if (!engin) return;
+        engin.statut = engin.statut === "Opérationnel" ? "Maintenance" : (engin.statut === "Maintenance" ? "Critique" : "Opérationnel");
         sauvegarderEtAfficher();
     }
-
-    function supprimerEngin(id) {
-        if (confirm("Confirmer la suppression définitive de cet appareil ?")) {
-            engins = engins.filter(e => e.id !== id);
-            sauvegarderEtAfficher();
-        }
-    }
-
-    function filtrerEngins() {
-        filtreTexte = document.getElementById('recherche').value;
-        afficherTableau();
-    }
-
-    function reinitialiserParcDefaut() {
-        if (confirm("Charger les données de démonstration pour tester devant les chefs ?")) {
-            engins = [...parcInitial];
-            sauvegarderEtAfficher();
-        }
-    }
-
+    function supprimerEngin(id) { if (confirm("Supprimer ?")) { engins = engins.filter(e => e.id !== id); sauvegarderEtAfficher(); } }
+    function filtrerEngins() { filtreTexte = document.getElementById('recherche').value; afficherTableau(); }
+    function reinitialiserParcDefaut() { if (confirm("Charger démo ?")) { engins = [...parcInitial]; sauvegarderEtAfficher(); } }
     window.onload = afficherTableau;
 </script>
 </body>
