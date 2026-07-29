@@ -792,25 +792,41 @@
         }
     }
 
-    function ouvrirIntervention(idx) {
-        let engin = db.engins[idx];
-        let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A, JNT-CUL-K`);
-        let qte = parseInt(prompt("Quantité nécessaire :", "1")) || 1;
-        
-        let p = db.stocks.find(item => item.ref === choixPiece);
-        if(!p) { alert("Référence invalide."); return; }
+   async function ouvrirIntervention(idx) {
+    let engin = db.engins[idx];
+    let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A...`);
+    let qte = parseInt(prompt("Quantité nécessaire :", "1")) || 1;
 
-        engin.statut = "Maintenance";
-        db.ordres.push({
-            id: Math.floor(100 + Math.random() * 900),
-            code: engin.code,
-            description: "Intervention corrective",
-            piece: choixPiece,
-            qteNecessaire: qte,
-            etat: "En Cours"
-        });
-        save();
+    let p = db.stocks.find(item => item.ref === choixPiece);
+    if(!p) {
+        alert("Référence invalide.");
+        return;
     }
+
+    engin.statut = "Maintenance";
+
+    const nouvelOrdre = {
+        id: Math.floor(100 + Math.random() * 900),
+        code: engin.code,
+        description: "Intervention corrective",
+        piece: choixPiece,
+        qteNecessaire: qte,
+        etat: "En cours"
+    };
+
+    db.ordres.push(nouvelOrdre);
+    save();
+
+    try {
+        await ajouterOrdreSupabase(nouvelOrdre);
+        alert("Ordre synchronisé avec Supabase !");
+    } catch (error) {
+        console.error("Erreur de synchro :", error);
+    }
+
+    renderApp();
+}
+
 
     function cloturerIntervention(idx) {
         let engin = db.engins[idx];
@@ -865,24 +881,28 @@ const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
 const SUPABASE_KEY = "Sb_publishable_Yo55jZq-fJ2poKtMbGRnSg_yNau5Gpb"; 
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-async function sauvegarderOrdreCloud(matricule, titre, statut, description) {
-  const { data, error } = await supabaseClient
-    .from('ordres_travail')
-    .insert([
-      { 
-        matricule: matricule, 
-        titre: titre, 
-        statut: statut, 
-        description: description 
-      }
-    ]);
+async function ajouterOrdreSupabase(ordre) {
+    const { data, error } = await supabaseClient
+        .from('ordres_travail')
+        .insert([
+            {
+                id: ordre.id,
+                code: ordre.code,
+                description: ordre.description,
+                piece: ordre.piece,
+                qteNecessaire: ordre.qteNecessaire,
+                etat: ordre.etat
+            }
+        ]);
 
-  if (error) {
-    console.error("Erreur cloud :", error);
-  } else {
-    console.log("Ordre enregistré sur Supabase !", data);
-  }
+    if (error) {
+        console.error("Erreur cloud :", error);
+        throw error;
+    } else {
+        console.log("Ordre enregistré sur Supabase !");
+    }
 }
+
 
 </script>
 </body>
