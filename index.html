@@ -18,10 +18,10 @@
             flex-direction: column;
             min-height: 100vh;
             position: relative;
-            background-color: #111827;
+            background-color: #0f172a;
         }
 
-        /* Arrière-plan thématique industriel et engins ultra-pro */
+        /* Arrière-plan professionnel avec engins de chantier miniers vus de loin */
         body::before {
             content: "";
             position: fixed;
@@ -29,50 +29,51 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(to bottom, rgba(20, 35, 60, 0.92), rgba(17, 24, 39, 0.95)), 
-                              url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80');
+            background-image: linear-gradient(to bottom, rgba(15, 32, 59, 0.93), rgba(15, 23, 42, 0.96)), 
+                              url('https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=80');
             background-size: cover;
             background-position: center;
             z-index: -1;
         }
 
         header {
-            background: rgba(28, 53, 94, 0.95);
+            background: rgba(20, 39, 70, 0.96);
             color: white;
-            padding: 0.8rem 1rem;
+            padding: 0.6rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            border-bottom: 3px solid #0056B3;
+            border-bottom: 3px solid #0091DA;
             backdrop-filter: blur(10px);
         }
 
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
-        /* Logo SNIM SVG Officiel et Précis */
+        /* Le Vrai Logo Officiel de la SNIM fidèlement reproduit en SVG */
         .snim-logo {
-            width: 55px;
-            height: 55px;
+            width: 75px;
+            height: 42px;
             background: #ffffff;
-            padding: 4px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            padding: 3px 5px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
         .logo-text h1 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: #FFFFFF;
+            line-height: 1.1;
         }
 
         .logo-text span {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #38BDF8;
             text-transform: uppercase;
             font-weight: 700;
@@ -95,22 +96,21 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 14px 8px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 14px 6px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-bottom: 4px solid #1C355E;
-            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-bottom: 4px solid #142746;
         }
 
         .stat-card.up { border-bottom-color: #10B981; }
         .stat-card.down { border-bottom-color: #EF4444; }
 
         .stat-card p {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #475569;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
@@ -121,10 +121,10 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.97);
             border-radius: 14px;
             padding: 1.2rem;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
         }
 
         .card-header {
@@ -143,8 +143,8 @@
         }
 
         .card-header h2 {
-            font-size: 1.1rem;
-            color: #1C355E;
+            font-size: 1.05rem;
+            color: #142746;
             font-weight: 700;
         }
 
@@ -164,8 +164,8 @@
         }
 
         .search-input:focus {
-            border-color: #1C355E;
-            box-shadow: 0 0 0 2px rgba(28,53,94,0.1);
+            border-color: #0091DA;
+            box-shadow: 0 0 0 2px rgba(0,145,218,0.1);
         }
 
         .btn-reset {
@@ -221,7 +221,6 @@
             font-weight: 700;
             display: inline-block;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .badge-success { background: #D1FAE5; color: #065F46; }
@@ -229,7 +228,7 @@
         .badge-danger { background: #FEE2E2; color: #991B1B; }
 
         .btn-toggle {
-            background: #1C355E;
+            background: #142746;
             border: none;
             padding: 7px 12px;
             border-radius: 6px;
@@ -237,7 +236,6 @@
             font-weight: 600;
             font-size: 0.75rem;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(28,53,94,0.2);
         }
 
         .btn-delete {
@@ -250,14 +248,13 @@
             font-size: 0.75rem;
             margin-left: 4px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(239,68,68,0.2);
         }
 
         .floating-btn {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #0056B3;
+            background: #0091DA;
             color: white;
             border: none;
             width: 56px;
@@ -279,11 +276,19 @@
 
 <header>
     <div class="logo-container">
-        <!-- Logo Officiel Dessiné en SVG (Flèche SNIM Bleue et Verte géométrique) -->
-        <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 20 L50 45 L85 20 L50 85 Z" fill="#0056B3"/>
-            <path d="M30 20 L50 38 L70 20 L50 65 Z" fill="#10B981"/>
-            <circle cx="50" cy="48" r="7" fill="#FFF"/>
+        <!-- SVG EXACT du Vrai Logo SNIM fourni -->
+        <svg class="snim-logo" viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg">
+            <!-- Texte Snim du logo officiel -->
+            <text x="65" y="22" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="#000000">Snim</text>
+            <!-- Forme Géométrique Tridirectionnelle Bleue -->
+            <g transform="translate(15, 10)">
+                <!-- Branche Supérieure Gauche -->
+                <path d="M 0 0 L 40 0 L 25 35 L 5 15 Z" fill="#0091DA"/>
+                <!-- Branche Droite -->
+                <path d="M 47 3 L 95 3 L 80 20 L 40 20 Z" fill="#0091DA"/>
+                <!-- Branche Basse -->
+                <path d="M 32 26 L 55 12 L 25 72 L 15 62 Z" fill="#0091DA"/>
+            </g>
         </svg>
         <div class="logo-text">
             <h1>SNIM GMAO</h1>
@@ -338,14 +343,12 @@
 <button class="floating-btn" onclick="ajouterEngin()">+</button>
 
 <script>
-    // Parc de démonstration si besoin
     const parcInitial = [
         { id: 1, code: "MT-88", modele: "Grue Liebherr", heures: "3450 h", statut: "Opérationnel" },
         { id: 2, code: "EX-12", modele: "Excavatrice Cat", heures: "5120 h", statut: "Maintenance" },
         { id: 3, code: "TR-05", modele: "Camion Rigide MAN", heures: "8900 h", statut: "Critique" }
     ];
 
-    // DÉMARRE À VIDE (Feuille blanche pour la production)
     let engins = JSON.parse(localStorage.getItem('snim_engins_v2')) || [];
     let filtreTexte = "";
 
@@ -362,13 +365,11 @@
         let dispo = 0;
         let atelier = 0;
 
-        // Calcul des compteurs globaux sur la totalité du vrai parc
         engins.forEach(e => {
             if (e.statut === "Opérationnel") dispo++;
             else atelier++;
         });
 
-        // Filtrage pour la recherche visuelle
         let enginsFiltres = engins.filter(e => 
             e.code.toLowerCase().includes(filtreTexte.toLowerCase()) || 
             e.modele.toLowerCase().includes(filtreTexte.toLowerCase())
@@ -385,7 +386,7 @@
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="font-weight:700; color:#1C355E; font-size:0.9rem;">${engin.code}</td>
+                <td style="font-weight:700; color:#142746; font-size:0.9rem;">${engin.code}</td>
                 <td style="font-weight:500;">${engin.modele}</td>
                 <td style="color:#475569;">${engin.heures}</td>
                 <td><span class="badge ${badgeClass}">${engin.statut}</span></td>
@@ -403,11 +404,11 @@
     }
 
     function ajouterEngin() {
-        let code = prompt("ENTRER LE CODE PARC (Ex: MT-42, EX-10) :");
+        let code = prompt("ENTRER LE CODE PARC (Ex: MT-88, EX-12) :");
         if (!code || code.trim() === "") return;
-        let modele = prompt("MARQUE & MODÈLE DE L'ENGIN (Ex: Grue Grove, Cat 777) :");
+        let modele = prompt("MARQUE & MODÈLE DE L'ENGIN (Ex: Grue Liebherr, Cat) :");
         if (!modele || modele.trim() === "") return;
-        let heures = prompt("HEURES AU COMPTEUR (Ex: 1250 h) :");
+        let heures = prompt("HEURES AU COMPTEUR (Ex: 3450 h) :");
         if (!heures) heures = "0 h";
 
         let nouveau = {
@@ -437,7 +438,7 @@
     }
 
     function supprimerEngin(id) {
-        if (confirm("Confirmer la suppression définitive de cet appareil du parc ?")) {
+        if (confirm("Confirmer la suppression définitive de cet appareil ?")) {
             engins = engins.filter(e => e.id !== id);
             sauvegarderEtAfficher();
         }
