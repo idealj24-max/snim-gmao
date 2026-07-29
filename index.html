@@ -9,58 +9,74 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
 
         body {
-            background-color: #EBF1F6;
             color: #0F1E36;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-image: linear-gradient(rgba(28, 53, 94, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(28, 53, 94, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
+            position: relative;
+            background-color: #111827;
+        }
+
+        /* Arrière-plan thématique industriel et engins ultra-pro */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to bottom, rgba(20, 35, 60, 0.92), rgba(17, 24, 39, 0.95)), 
+                              url('https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
         }
 
         header {
-            background: #1C355E;
+            background: rgba(28, 53, 94, 0.95);
             color: white;
-            padding: 1rem;
+            padding: 0.8rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-bottom: 3px solid #0056B3;
+            backdrop-filter: blur(10px);
         }
 
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
-        .logo-badge {
-            background: #CCFF00;
-            color: #1C355E;
-            font-weight: 900;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        /* Logo SNIM SVG Officiel et Précis */
+        .snim-logo {
+            width: 55px;
+            height: 55px;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .logo-text h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.1;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #FFFFFF;
         }
 
         .logo-text span {
-            font-size: 0.65rem;
-            color: #A5B4FC;
+            font-size: 0.7rem;
+            color: #38BDF8;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         main {
@@ -74,17 +90,18 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 1.5rem;
         }
 
         .stat-card {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 14px 8px;
+            border-radius: 10px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border-bottom: 4px solid #1C355E;
+            backdrop-filter: blur(5px);
         }
 
         .stat-card.up { border-bottom-color: #10B981; }
@@ -92,124 +109,169 @@
 
         .stat-card p {
             font-size: 0.75rem;
-            color: #64748B;
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .stat-card h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: 2px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-top: 4px;
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 14px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
 
         .card-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 1rem;
         }
 
+        @media(min-width: 600px) {
+            .card-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
         .card-header h2 {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: #1C355E;
+            font-weight: 700;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #1C355E;
+            box-shadow: 0 0 0 2px rgba(28,53,94,0.1);
         }
 
         .btn-reset {
-            background: #F1F5F9;
-            border: 1px solid #CBD5E1;
-            padding: 4px 8px;
-            font-size: 0.7rem;
-            color: #475569;
-            border-radius: 4px;
+            background: #E2E8F0;
+            border: none;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: #334155;
+            font-weight: 600;
+            border-radius: 6px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .table-container {
             overflow-x: auto;
             border: 1px solid #E2E8F0;
-            border-radius: 6px;
+            border-radius: 8px;
+            background: white;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
-            min-width: 400px;
+            min-width: 450px;
         }
 
         th {
-            background: #F8FAFC;
-            color: #64748B;
-            padding: 10px;
+            background: #F1F5F9;
+            color: #475569;
+            padding: 12px 10px;
             text-align: left;
-            font-weight: 600;
-            border-bottom: 1px solid #E2E8F0;
+            font-weight: 700;
+            border-bottom: 2px solid #E2E8F0;
+            text-transform: uppercase;
+            font-size: 0.75rem;
         }
 
         td {
-            padding: 12px 10px;
+            padding: 14px 10px;
             border-bottom: 1px solid #F1F5F9;
         }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-block;
+        tr:hover {
+            background-color: #F8FAFC;
         }
 
-        .badge-success { background: #DCFCE7; color: #166534; }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .badge-success { background: #D1FAE5; color: #065F46; }
         .badge-warning { background: #FEF3C7; color: #92400E; }
         .badge-danger { background: #FEE2E2; color: #991B1B; }
 
         .btn-toggle {
-            background: #F1F5F9;
+            background: #1C355E;
             border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            color: #1C355E;
+            padding: 7px 12px;
+            border-radius: 6px;
+            color: white;
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(28,53,94,0.2);
         }
 
         .btn-delete {
-            background: #FEE2E2;
+            background: #EF4444;
             border: none;
-            color: #EF4444;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 0.7rem;
-            margin-left: 6px;
+            color: white;
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-left: 4px;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(239,68,68,0.2);
         }
 
         .floating-btn {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1C355E;
+            bottom: 24px;
+            right: 24px;
+            background: #0056B3;
             color: white;
             border: none;
-            width: 52px;
-            height: 52px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 99;
             cursor: pointer;
+            border: 2px solid white;
         }
     </style>
 </head>
@@ -217,9 +279,14 @@
 
 <header>
     <div class="logo-container">
-        <div class="logo-badge">SNIM</div>
+        <!-- Logo Officiel Dessiné en SVG (Flèche SNIM Bleue et Verte géométrique) -->
+        <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 20 L50 45 L85 20 L50 85 Z" fill="#0056B3"/>
+            <path d="M30 20 L50 38 L70 20 L50 65 Z" fill="#10B981"/>
+            <circle cx="50" cy="48" r="7" fill="#FFF"/>
+        </svg>
         <div class="logo-text">
-            <h1>GMAO</h1>
+            <h1>SNIM GMAO</h1>
             <span>Atelier Mécanique</span>
         </div>
     </div>
@@ -232,11 +299,11 @@
             <h3 id="txt-total">0</h3>
         </div>
         <div class="stat-card up">
-            <p>Dispo</p>
+            <p>Disponibles</p>
             <h3 id="txt-dispo" style="color: #10B981;">0</h3>
         </div>
         <div class="stat-card down">
-            <p>Atelier</p>
+            <p>Immobilisés</p>
             <h3 id="txt-atelier" style="color: #EF4444;">0</h3>
         </div>
     </div>
@@ -244,21 +311,24 @@
     <div class="card">
         <div class="card-header">
             <h2>Suivi des Engins & Matériels</h2>
-            <button class="btn-reset" onclick="reinitialiserParcDefaut()">Parc par défaut</button>
+            <div class="actions-bar">
+                <input type="text" id="recherche" class="search-input" placeholder="🔍 Rechercher un engin..." oninput="filtrerEngins()">
+                <button class="btn-reset" onclick="reinitialiserParcDefaut()">Mode Démo</button>
+            </div>
         </div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Code</th>
-                        <th>Modèle</th>
-                        <th>Heures</th>
-                        <th>Statut</th>
-                        <th>Action</th>
+                        <th>Code Parc</th>
+                        <th>Désignation / Modèle</th>
+                        <th>Heures Moteur</th>
+                        <th>Statut Actuel</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="table-corps">
-                    <!-- Généré dynamiquement par JavaScript -->
+                    <!-- Données gérées dynamiquement -->
                 </tbody>
             </table>
         </div>
@@ -268,18 +338,19 @@
 <button class="floating-btn" onclick="ajouterEngin()">+</button>
 
 <script>
-    // Liste de base par défaut
+    // Parc de démonstration si besoin
     const parcInitial = [
         { id: 1, code: "MT-88", modele: "Grue Liebherr", heures: "3450 h", statut: "Opérationnel" },
         { id: 2, code: "EX-12", modele: "Excavatrice Cat", heures: "5120 h", statut: "Maintenance" },
         { id: 3, code: "TR-05", modele: "Camion Rigide MAN", heures: "8900 h", statut: "Critique" }
     ];
 
-    // Charger les données depuis le stockage du téléphone ou utiliser la base initiale
-    let engins = JSON.parse(localStorage.getItem('snim_engins')) || parcInitial;
+    // DÉMARRE À VIDE (Feuille blanche pour la production)
+    let engins = JSON.parse(localStorage.getItem('snim_engins_v2')) || [];
+    let filtreTexte = "";
 
     function sauvegarderEtAfficher() {
-        localStorage.setItem('snim_engins', JSON.stringify(engins));
+        localStorage.setItem('snim_engins_v2', JSON.stringify(engins));
         afficherTableau();
     }
 
@@ -291,22 +362,32 @@
         let dispo = 0;
         let atelier = 0;
 
-        engins.forEach((engin) => {
-            if (engin.statut === "Opérationnel") {
-                dispo++;
-            } else {
-                atelier++;
-            }
+        // Calcul des compteurs globaux sur la totalité du vrai parc
+        engins.forEach(e => {
+            if (e.statut === "Opérationnel") dispo++;
+            else atelier++;
+        });
 
+        // Filtrage pour la recherche visuelle
+        let enginsFiltres = engins.filter(e => 
+            e.code.toLowerCase().includes(filtreTexte.toLowerCase()) || 
+            e.modele.toLowerCase().includes(filtreTexte.toLowerCase())
+        );
+
+        if(enginsFiltres.length === 0) {
+            corps.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748B; padding:20px;">Aucun engin enregistré ou ne correspond à la recherche.</td></tr>`;
+        }
+
+        enginsFiltres.forEach((engin) => {
             let badgeClass = "badge-success";
             if (engin.statut === "Maintenance") badgeClass = "badge-warning";
             if (engin.statut === "Critique") badgeClass = "badge-danger";
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="font-weight:700; color:#1C355E;">${engin.code}</td>
-                <td>${engin.modele}</td>
-                <td>${engin.heures}</td>
+                <td style="font-weight:700; color:#1C355E; font-size:0.9rem;">${engin.code}</td>
+                <td style="font-weight:500;">${engin.modele}</td>
+                <td style="color:#475569;">${engin.heures}</td>
                 <td><span class="badge ${badgeClass}">${engin.statut}</span></td>
                 <td>
                     <button class="btn-toggle" onclick="changerStatut(${engin.id})">Statut</button>
@@ -322,18 +403,18 @@
     }
 
     function ajouterEngin() {
-        let code = prompt("CODE PARC (Ex: MT-30) :");
+        let code = prompt("ENTRER LE CODE PARC (Ex: MT-42, EX-10) :");
         if (!code || code.trim() === "") return;
-        let modele = prompt("MODÈLE / MARQUE :");
+        let modele = prompt("MARQUE & MODÈLE DE L'ENGIN (Ex: Grue Grove, Cat 777) :");
         if (!modele || modele.trim() === "") return;
-        let heures = prompt("HEURES DE MARCHE (Ex: 1200 h) :");
+        let heures = prompt("HEURES AU COMPTEUR (Ex: 1250 h) :");
         if (!heures) heures = "0 h";
 
         let nouveau = {
-            id: Date.now(), // ID unique basé sur le temps
-            code: code.toUpperCase(),
-            modele: modele,
-            heures: heures,
+            id: Date.now(),
+            code: code.toUpperCase().trim(),
+            modele: modele.trim(),
+            heures: heures.trim(),
             statut: "Opérationnel"
         };
 
@@ -356,20 +437,24 @@
     }
 
     function supprimerEngin(id) {
-        if (confirm("Voulez-vous vraiment supprimer cet engin ?")) {
+        if (confirm("Confirmer la suppression définitive de cet appareil du parc ?")) {
             engins = engins.filter(e => e.id !== id);
             sauvegarderEtAfficher();
         }
     }
 
+    function filtrerEngins() {
+        filtreTexte = document.getElementById('recherche').value;
+        afficherTableau();
+    }
+
     function reinitialiserParcDefaut() {
-        if (confirm("Réinitialiser avec les 3 engins de démonstration ?")) {
+        if (confirm("Charger les données de démonstration pour tester devant les chefs ?")) {
             engins = [...parcInitial];
             sauvegarderEtAfficher();
         }
     }
 
-    // Lancer l'affichage au chargement de la page
     window.onload = afficherTableau;
 </script>
 </body>
