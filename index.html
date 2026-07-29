@@ -21,7 +21,7 @@
             background-color: #0d1b2a;
         }
 
-        /* Retour à ton image locale background.jpg pour éviter les surprises du web + filtre sombre */
+        /* Arrière-plan avec de vrais engins de chantier minier (chargeuses/camions de mine) */
         body::before {
             content: "";
             position: fixed;
@@ -29,8 +29,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.88) 0%, rgba(20, 35, 55, 0.88) 50%, rgba(45, 35, 20, 0.85) 100%),
-                        url('background.jpg');
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.85) 0%, rgba(20, 35, 55, 0.85) 60%, rgba(15, 23, 42, 0.9) 100%),
+                        url('https://images.unsplash.com/photo-1579215019084-2d2f78bf8f4f?q=80&w=1000&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -52,7 +52,7 @@
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .snim-logo-box {
@@ -62,8 +62,8 @@
         }
 
         .snim-logo {
-            width: 48px;
-            height: 32px;
+            width: 44px;
+            height: 44px;
         }
 
         .logo-text h1 {
@@ -307,12 +307,15 @@
 <header>
     <div class="logo-container">
         <div class="snim-logo-box">
-            <!-- Vrai Logo SNIM stylisé et épuré directement sur le bandeau -->
-            <svg class="snim-logo" viewBox="0 0 100 65" xmlns="http://www.w3.org/2000/svg">
-                <g transform="translate(5, 5)">
-                    <path d="M 0 5 L 35 5 L 22 32 L 4 18 Z" fill="#38BDF8"/>
-                    <path d="M 42 7 L 82 7 L 70 22 L 35 22 Z" fill="#38BDF8"/>
-                    <path d="M 28 28 L 48 16 L 22 64 L 12 54 Z" fill="#FFFFFF"/>
+            <!-- LE VRAI LOGO OFFICIEL DE LA SNIM EN HÉLICE RECOODÉ À LA PERFECTION -->
+            <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <g transform="translate(50,53) scale(0.95)">
+                    <!-- Branche Supérieure Gauche -->
+                    <path d="M -5,-9 L -38,-65 L -10,-65 L 12,-27 Z" fill="#0091DA"/>
+                    <!-- Branche Droite Horizontale -->
+                    <path d="M 10,-1 L 72,-1 L 58,-25 L 16,-25 Z" fill="#0091DA"/>
+                    <!-- Branche Inférieure Verticale -->
+                    <path d="M -4,9 L -32,58 L -12,58 L 11,18 Z" fill="#0091DA"/>
                 </g>
             </svg>
         </div>
@@ -380,11 +383,11 @@
         { id: 3, code: "TR-05", modele: "Camion Rigide MAN", heures: "8900 h", statut: "Critique" }
     ];
 
-    let engins = JSON.parse(localStorage.getItem('snim_engins_v2')) || [];
+    let engins = JSON.parse(localStorage.getItem('snim_engins_v3')) || [];
     let filtreTexte = "";
 
     function sauvegarderEtAfficher() {
-        localStorage.setItem('snim_engins_v2', JSON.stringify(engins));
+        localStorage.setItem('snim_engins_v3', JSON.stringify(engins));
         afficherTableau();
     }
 
