@@ -859,6 +859,31 @@
             save();
         }
     }
+
+    // Connexion au Cloud Supabase
+const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
+const SUPABASE_KEY = "Sb_publishable_Yo55jZq-fJ2poKtMbGRnSg_yNau5Gpb"; 
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function sauvegarderOrdreCloud(matricule, titre, statut, description) {
+  const { data, error } = await supabaseClient
+    .from('ordres_travail')
+    .insert([
+      { 
+        matricule: matricule, 
+        titre: titre, 
+        statut: statut, 
+        description: description 
+      }
+    ]);
+
+  if (error) {
+    console.error("Erreur cloud :", error);
+  } else {
+    console.log("Ordre enregistré sur Supabase !", data);
+  }
+}
+
 </script>
 </body>
 </html>
