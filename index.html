@@ -18,10 +18,10 @@
             flex-direction: column;
             min-height: 100vh;
             position: relative;
-            background-color: #0B132B;
+            background-color: #0d1b2a;
         }
 
-        /* Arrière-plan graphique autonome : silhouettes géométriques d'engins, de grues et de structures minières */
+        /* Arrière-plan avec des motifs d'engins bien contrastés et visibles */
         body::before {
             content: "";
             position: fixed;
@@ -29,8 +29,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(11, 19, 43, 0.92) 0%, rgba(28, 37, 65, 0.95) 100%),
-                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%2338bdf8' fill-opacity='0.04'%3E%3Cpath d='M10 130 L40 100 L70 100 L90 120 L130 120 L140 135 L10 135 Z' /%3E%3Ccircle cx='35' cy='135' r='8' /%3E%3Ccircle cx='55' cy='135' r='8' /%3E%3Ccircle cx='110' cy='135' r='10' /%3E%3Ccircle cx='130' cy='135' r='10' /%3E%3Cpath d='M20 50 L60 20 L65 25 L30 55 Z' /%3E%3Cpath d='M55 20 L55 100 M60 20 L60 100' /%3E%3C/g%3E%3C/svg%3E");
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.78) 0%, rgba(20, 35, 55, 0.82) 100%),
+                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='%2338bdf8' fill-opacity='0.15'%3E%3Cpath d='M15 150 L55 110 L95 110 L120 135 L170 135 L180 155 L15 155 Z' /%3E%3Ccircle cx='45' cy='155' r='12' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='75' cy='155' r='12' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='145' cy='155' r='14' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='170' cy='155' r='14' fill='%230091DA' fill-opacity='0.3'/%3E%3Cpath d='M30 60 L80 20 L88 28 L40 68 Z' /%3E%3Cpath d='M72 20 L72 130 M80 20 L80 130' stroke='%2338bdf8' stroke-width='4' stroke-opacity='0.15'/%3E%3C/g%3E%3C/svg%3E");
             z-index: -1;
         }
 
@@ -304,7 +304,6 @@
 <header>
     <div class="logo-container">
         <div class="snim-logo-box">
-            <!-- LE VRAI LOGO EN HÉLICE S'AFFICHE BIEN MAINTENANT -->
             <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <g transform="translate(50,53) scale(0.95)">
                     <path d="M -5,-9 L -38,-65 L -10,-65 L 12,-27 Z" fill="#38BDF8"/>
@@ -377,11 +376,11 @@
         { id: 3, code: "TR-05", modele: "Camion Rigide MAN", heures: "8900 h", statut: "Critique" }
     ];
 
-    let engins = JSON.parse(localStorage.getItem('snim_engins_final')) || [];
+    let engins = JSON.parse(localStorage.getItem('snim_engins_visible')) || [];
     let filtreTexte = "";
 
     function sauvegarderEtAfficher() {
-        localStorage.setItem('snim_engins_final', JSON.stringify(engins));
+        localStorage.setItem('snim_engins_visible', JSON.stringify(engins));
         afficherTableau();
     }
 
