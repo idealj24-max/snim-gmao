@@ -21,7 +21,7 @@
             background-color: #0f172a;
         }
 
-        /* Arrière-plan professionnel avec engins de chantier miniers vus de loin */
+        /* Arrière-plan inspiré de ta photo : Grue et montagnes désertiques */
         body::before {
             content: "";
             position: fixed;
@@ -29,8 +29,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: linear-gradient(to bottom, rgba(15, 32, 59, 0.93), rgba(15, 23, 42, 0.96)), 
-                              url('https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=80');
+            background-image: linear-gradient(to bottom, rgba(15, 32, 59, 0.90), rgba(15, 23, 42, 0.94)), 
+                              url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80');
             background-size: cover;
             background-position: center;
             z-index: -1;
@@ -39,7 +39,7 @@
         header {
             background: rgba(20, 39, 70, 0.96);
             color: white;
-            padding: 0.6rem 1rem;
+            padding: 0.7rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -54,14 +54,22 @@
             gap: 12px;
         }
 
-        /* Le Vrai Logo Officiel de la SNIM fidèlement reproduit en SVG */
-        .snim-logo {
-            width: 75px;
-            height: 42px;
+        /* Conteneur et ajustement parfait du Logo SNIM */
+        .snim-logo-box {
+            width: 70px;
+            height: 46px;
             background: #ffffff;
-            padding: 3px 5px;
             border-radius: 6px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+        }
+
+        .snim-logo {
+            width: 100%;
+            height: 100%;
         }
 
         .logo-text h1 {
@@ -276,20 +284,22 @@
 
 <header>
     <div class="logo-container">
-        <!-- SVG EXACT du Vrai Logo SNIM fourni -->
-        <svg class="snim-logo" viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg">
-            <!-- Texte Snim du logo officiel -->
-            <text x="65" y="22" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="#000000">Snim</text>
-            <!-- Forme Géométrique Tridirectionnelle Bleue -->
-            <g transform="translate(15, 10)">
-                <!-- Branche Supérieure Gauche -->
-                <path d="M 0 0 L 40 0 L 25 35 L 5 15 Z" fill="#0091DA"/>
-                <!-- Branche Droite -->
-                <path d="M 47 3 L 95 3 L 80 20 L 40 20 Z" fill="#0091DA"/>
-                <!-- Branche Basse -->
-                <path d="M 32 26 L 55 12 L 25 72 L 15 62 Z" fill="#0091DA"/>
-            </g>
-        </svg>
+        <!-- Boîte ajustée au millimètre pour le vrai logo SNIM -->
+        <div class="snim-logo-box">
+            <svg class="snim-logo" viewBox="0 0 110 75" xmlns="http://www.w3.org/2000/svg">
+                <!-- Texte Snim bien positionné -->
+                <text x="46" y="20" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#000000">Snim</text>
+                <!-- Symbole des trois branches bleues ajusté pour éviter toute coupure -->
+                <g transform="translate(10, 12)">
+                    <!-- Branche Supérieure Gauche -->
+                    <path d="M 0 5 L 32 5 L 20 33 L 4 17 Z" fill="#0091DA"/>
+                    <!-- Branche Droite -->
+                    <path d="M 38 7 L 76 7 L 64 21 L 32 21 Z" fill="#0091DA"/>
+                    <!-- Branche Basse -->
+                    <path d="M 26 26 L 44 15 L 20 63 L 12 55 Z" fill="#0091DA"/>
+                </g>
+            </svg>
+        </div>
         <div class="logo-text">
             <h1>SNIM GMAO</h1>
             <span>Atelier Mécanique</span>
@@ -333,7 +343,7 @@
                     </tr>
                 </thead>
                 <tbody id="table-corps">
-                    <!-- Données gérées dynamiquement -->
+                    <!-- Données dynamiques -->
                 </tbody>
             </table>
         </div>
