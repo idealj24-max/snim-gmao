@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNIM GMAO - Atelier Mécanique</title>
+    <title>SNIM GMAO Pro</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,10 +18,10 @@
             flex-direction: column;
             min-height: 100vh;
             position: relative;
-            background-color: #0d1b2a;
+            background-color: #0b132b;
         }
 
-        /* Arrière-plan avec des motifs d'engins bien contrastés et visibles */
+        /* Arrière-plan réseau industriel */
         body::before {
             content: "";
             position: fixed;
@@ -29,21 +29,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.78) 0%, rgba(20, 35, 55, 0.82) 100%),
-                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='%2338bdf8' fill-opacity='0.15'%3E%3Cpath d='M15 150 L55 110 L95 110 L120 135 L170 135 L180 155 L15 155 Z' /%3E%3Ccircle cx='45' cy='155' r='12' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='75' cy='155' r='12' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='145' cy='155' r='14' fill='%230091DA' fill-opacity='0.3'/%3E%3Ccircle cx='170' cy='155' r='14' fill='%230091DA' fill-opacity='0.3'/%3E%3Cpath d='M30 60 L80 20 L88 28 L40 68 Z' /%3E%3Cpath d='M72 20 L72 130 M80 20 L80 130' stroke='%2338bdf8' stroke-width='4' stroke-opacity='0.15'/%3E%3C/g%3E%3C/svg%3E");
+            background: linear-gradient(135deg, rgba(11, 19, 43, 0.94) 0%, rgba(28, 37, 65, 0.96) 100%),
+                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%2338bdf8' fill-opacity='0.03'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40z'/%3E%3C/g%3E%3C/svg%3E");
             z-index: -1;
         }
 
         header {
-            background: rgba(18, 35, 60, 0.95);
+            background: rgba(18, 35, 60, 0.98);
             color: white;
             padding: 0.8rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             border-bottom: 3px solid #0091DA;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .logo-container {
@@ -52,23 +51,28 @@
             gap: 12px;
         }
 
-        .snim-logo-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .snim-logo {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
         }
 
         .logo-text h1 {
             font-size: 1.15rem;
             font-weight: 800;
-            letter-spacing: 0.5px;
             color: #FFFFFF;
-            line-height: 1.1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logo-text h1 .pro-badge {
+            background: #0091DA;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
         }
 
         .logo-text span {
@@ -79,194 +83,213 @@
             letter-spacing: 0.5px;
         }
 
+        /* Navigation par Onglets Tactiles */
+        .nav-tabs {
+            display: flex;
+            background: #1c2541;
+            margin: 10px 1rem 0 1rem;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #94A3B8;
+            padding: 10px 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .tab-btn.active {
+            background: #0091DA;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,145,218,0.4);
+        }
+
         main {
             padding: 1rem;
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
             flex: 1;
-            padding-bottom: 3rem;
+            padding-bottom: 5rem;
         }
 
+        /* KPI Dashboard */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+
+        .stats-grid-full {
+            grid-template-columns: 1fr;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.96);
-            padding: 14px 6px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 12px 10px;
             border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border-bottom: 4px solid #142746;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-left: 5px solid #0091DA;
         }
 
-        .stat-card.up { border-bottom-color: #10B981; }
-        .stat-card.down { border-bottom-color: #EF4444; }
+        .stat-card.alert-card { border-left-color: #EF4444; }
+        .stat-card.budget-card { border-left-color: #F59E0B; }
 
         .stat-card p {
-            font-size: 0.7rem;
-            color: #475569;
+            font-size: 0.65rem;
+            color: #64748B;
             font-weight: 700;
             text-transform: uppercase;
         }
 
         .stat-card h3 {
-            font-size: 1.6rem;
+            font-size: 1.3rem;
             font-weight: 800;
-            margin-top: 4px;
+            color: #1E293B;
+            margin-top: 2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 14px;
-            padding: 1.2rem;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-        }
-
-        .card-header {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
             margin-bottom: 1rem;
         }
 
-        @media(min-width: 600px) {
-            .card-header {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-
-        .card-header h2 {
-            font-size: 1.05rem;
-            color: #142746;
-            font-weight: 700;
-        }
-
-        .actions-bar {
+        .card h2 {
+            font-size: 1rem;
+            color: #1C2541;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 6px;
             display: flex;
-            gap: 8px;
+            justify-content: space-between;
             align-items: center;
         }
 
+        /* Outils IoT et Filtrage */
+        .tool-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
         .search-input {
-            width: 100%;
-            padding: 8px 12px;
+            flex: 1;
+            padding: 10px;
             border: 1px solid #CBD5E1;
             border-radius: 6px;
             font-size: 0.85rem;
             outline: none;
         }
 
-        .search-input:focus {
-            border-color: #0091DA;
-            box-shadow: 0 0 0 2px rgba(0,145,218,0.1);
-        }
-
-        .btn-reset {
-            background: #E2E8F0;
+        .btn-action {
+            background: #1C2541;
+            color: white;
             border: none;
-            padding: 8px 12px;
-            font-size: 0.75rem;
-            color: #334155;
-            font-weight: 600;
+            padding: 10px 14px;
             border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
             cursor: pointer;
-            white-space: nowrap;
         }
 
+        .btn-iot {
+            background: #10B981;
+        }
+
+        /* Listes et Tableaux */
         .table-container {
             overflow-x: auto;
-            border: 1px solid #E2E8F0;
-            border-radius: 8px;
-            background: white;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 450px;
+            font-size: 0.8rem;
+            text-align: left;
         }
 
         th {
             background: #F1F5F9;
             color: #475569;
-            padding: 12px 10px;
-            text-align: left;
+            padding: 10px;
             font-weight: 700;
-            border-bottom: 2px solid #E2E8F0;
             text-transform: uppercase;
-            font-size: 0.75rem;
         }
 
         td {
-            padding: 14px 10px;
-            border-bottom: 1px solid #F1F5F9;
+            padding: 12px 10px;
+            border-bottom: 1px solid #E2E8F0;
         }
 
-        tr:hover {
-            background-color: #F8FAFC;
-        }
-
+        /* Statuts & Badges */
         .badge {
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 700;
-            display: inline-block;
-            text-align: center;
+            text-transform: uppercase;
         }
 
-        .badge-success { background: #D1FAE5; color: #065F46; }
-        .badge-warning { background: #FEF3C7; color: #92400E; }
-        .badge-danger { background: #FEE2E2; color: #991B1B; }
+        .badge-ok { background: #D1FAE5; color: #065F46; }
+        .badge-maint { background: #FEF3C7; color: #92400E; }
+        .badge-crit { background: #FEE2E2; color: #991B1B; }
 
-        .btn-toggle {
-            background: #142746;
-            border: none;
-            padding: 7px 12px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.75rem;
-            cursor: pointer;
+        .action-btns {
+            display: flex;
+            gap: 4px;
         }
 
-        .btn-delete {
-            background: #EF4444;
+        .btn-sm {
+            padding: 6px 10px;
+            border-radius: 4px;
             border: none;
-            color: white;
-            padding: 7px 10px;
-            border-radius: 6px;
             font-weight: 700;
-            font-size: 0.75rem;
-            margin-left: 4px;
+            font-size: 0.7rem;
             cursor: pointer;
+            color: white;
         }
+
+        .btn-sm-maint { background: #F59E0B; }
+        .btn-sm-clear { background: #10B981; }
+        .btn-sm-del { background: #EF4444; }
 
         .floating-btn {
             position: fixed;
-            bottom: 75px;
+            bottom: 20px;
             right: 24px;
             background: #0091DA;
             color: white;
             border: none;
-            width: 56px;
-            height: 56px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            font-size: 1.8rem;
-            font-weight: bold;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            font-size: 1.6rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 99;
+            z-index: 999;
             cursor: pointer;
             border: 2px solid white;
         }
@@ -276,148 +299,304 @@
             color: #94A3B8;
             text-align: center;
             padding: 12px 1rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            letter-spacing: 0.3px;
-        }
-
-        footer strong {
-            color: #38BDF8;
-            font-weight: 700;
-        }
-
-        .footer-email {
-            margin-top: 4px;
             font-size: 0.7rem;
-            color: #CBD5E1;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .footer-email a {
-            color: #38BDF8;
-            text-decoration: none;
-        }
+        footer strong { color: #38BDF8; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo-container">
-        <div class="snim-logo-box">
-            <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <g transform="translate(50,53) scale(0.95)">
-                    <path d="M -5,-9 L -38,-65 L -10,-65 L 12,-27 Z" fill="#38BDF8"/>
-                    <path d="M 10,-1 L 72,-1 L 58,-25 L 16,-25 Z" fill="#38BDF8"/>
-                    <path d="M -4,9 L -32,58 L -12,58 L 11,18 Z" fill="#38BDF8"/>
-                </g>
-            </svg>
-        </div>
+        <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(50,53) scale(0.95)">
+                <path d="M -5,-9 L -38,-65 L -10,-65 L 12,-27 Z" fill="#38BDF8"/>
+                <path d="M 10,-1 L 72,-1 L 58,-25 L 16,-25 Z" fill="#38BDF8"/>
+                <path d="M -4,9 L -32,58 L -12,58 L 11,18 Z" fill="#38BDF8"/>
+            </g>
+        </svg>
         <div class="logo-text">
-            <h1>SNIM GMAO</h1>
-            <span>Atelier Mécanique</span>
+            <h1>SNIM GMAO <span class="pro-badge">PRO</span></h1>
+            <span>Système d'Atelier Intelligent</span>
         </div>
     </div>
 </header>
 
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('parc')">Parc Engins</button>
+    <button class="tab-btn" onclick="switchTab('stock')">Stocks MRO</button>
+    <button class="tab-btn" onclick="switchTab('ot')">Ordres Travail</button>
+</div>
+
 <main>
     <div class="stats-grid">
         <div class="stat-card">
-            <p>Total Parc</p>
-            <h3 id="txt-total">0</h3>
+            <p>Disponibilité Parc</p>
+            <h3 id="kpi-dispo">100%</h3>
         </div>
-        <div class="stat-card up">
-            <p>Disponibles</p>
-            <h3 id="txt-dispo" style="color: #10B981;">0</h3>
+        <div class="stat-card alert-card">
+            <p>Alertes Critiques</p>
+            <h3 id="kpi-alertes">0</h3>
         </div>
-        <div class="stat-card down">
-            <p>Immobilisés</p>
-            <h3 id="txt-atelier" style="color: #EF4444;">0</h3>
+    </div>
+    <div class="stats-grid stats-grid-full">
+        <div class="stat-card budget-card">
+            <p>Dépenses de Maintenance (MRO)</p>
+            <h3 id="kpi-budget">0 UM</h3>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h2>Suivi des Engins & Matériels</h2>
-            <div class="actions-bar">
-                <input type="text" id="recherche" class="search-input" placeholder="🔍 Rechercher un engin..." oninput="filtrerEngins()">
-                <button class="btn-reset" onclick="reinitialiserParcDefaut()">Mode Démo</button>
+    <!-- ONGLET 1 : PARC ENGINS -->
+    <div id="tab-parc" class="tab-content active">
+        <div class="card">
+            <h2>Suivi du Matériel et Télémétrie 
+                <button class="btn-sm btn-sm-clear btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT</button>
+            </h2>
+            <div class="tool-bar">
+                <input type="text" id="search-engin" class="search-input" placeholder="🔍 Scanner QR ou taper code..." oninput="renderApp()">
+                <button class="btn-action" onclick="simulerScanQR()">📷 Scan QR</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code Parc</th>
+                            <th>Modèle / Engin</th>
+                            <th>Heures Moteur</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="parc-tbody"></tbody>
+                </table>
             </div>
         </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Code Parc</th>
-                        <th>Désignation / Modèle</th>
-                        <th>Heures Moteur</th>
-                        <th>Statut Actuel</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="table-corps">
-                    <!-- Données dynamiques -->
-                </tbody>
-            </table>
+    </div>
+
+    <!-- ONGLET 2 : STOCKS MRO -->
+    <div id="tab-stock" class="tab-content">
+        <div class="card">
+            <h2>Magasin des Pièces Détachées</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Désignation de la pièce</th>
+                            <th>Stock Restant</th>
+                            <th>Prix Unitaire</th>
+                            <th>Alerte Ravitaillement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET 3 : ORDRES DE TRAVAIL -->
+    <div id="tab-ot" class="tab-content">
+        <div class="card">
+            <h2>Ordres de Travail (OT) en cours</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID OT</th>
+                            <th>Code Engin</th>
+                            <th>Type Intervention</th>
+                            <th>Pièce Assignée</th>
+                            <th>Statut Flux</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ot-tbody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </main>
 
-<button class="floating-btn" onclick="ajouterEngin()">+</button>
+<button class="floating-btn" onclick="ajouterNouvelEngin()">+</button>
 
 <footer>
-    Application GMAO SNIM &copy; 2026 | Développée par <strong>Idriss</strong>
-    <div class="footer-email">Contact : <a href="mailto:idealj24@gmail.com">idealj24@gmail.com</a></div>
+    Plateforme Industrielle SNIM GMAO Pro &copy; 2026 | Conçu par <strong>Idriss</strong>
 </footer>
 
 <script>
-    const parcInitial = [
-        { id: 1, code: "MT-88", modele: "Grue Liebherr", heures: "3450 h", statut: "Opérationnel" },
-        { id: 2, code: "EX-12", modele: "Excavatrice Cat", heures: "5120 h", statut: "Maintenance" },
-        { id: 3, code: "TR-05", modele: "Camion Rigide MAN", heures: "8900 h", statut: "Critique" }
-    ];
+    let db = JSON.parse(localStorage.getItem('snim_gmao_pro_v2')) || {
+        engins: [
+            { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel" },
+            { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance" },
+            { code: "BULL-005", modele: "Bulldozer Liebherr PR776", heures: 5120, statut: "Critique" }
+        ],
+        stocks: [
+            { ref: "FIL-OIL-01", nom: "Filtre à huile gros moteur", qte: 14, prix: 4500 },
+            { ref: "HYD-FLUID-A", nom: "Fluide hydraulique Haute Pression (L)", qte: 350, prix: 120 },
+            { ref: "JNT-CUL-K", nom: "Kit joint de culasse renforcé", qte: 3, prix: 12500 }
+        ],
+        ordres: [
+            { id: 101, code: "TOMB-088", description: "Remplacement préventif des filtres", piece: "FIL-OIL-01", qteNecessaire: 2, etat: "En Cours" },
+            { id: 102, code: "BULL-005", description: "Fuite majeure circuit hydraulique", piece: "HYD-FLUID-A", qteNecessaire: 50, etat: "En Cours" }
+        ],
+        coutTotalMRO: 15100
+    };
 
-    let engins = JSON.parse(localStorage.getItem('snim_engins_visible')) || [];
-    let filtreTexte = "";
-
-    function sauvegarderEtAfficher() {
-        localStorage.setItem('snim_engins_visible', JSON.stringify(engins));
-        afficherTableau();
+    function save() {
+        localStorage.setItem('snim_gmao_pro_v2', JSON.stringify(db));
+        renderApp();
     }
 
-    function afficherTableau() {
-        let corps = document.getElementById('table-corps');
-        corps.innerHTML = "";
-        let total = engins.length;
-        let dispo = 0; let atelier = 0;
-        engins.forEach(e => { if (e.statut === "Opérationnel") dispo++; else atelier++; });
-        let enginsFiltres = engins.filter(e => e.code.toLowerCase().includes(filtreTexte.toLowerCase()) || e.modele.toLowerCase().includes(filtreTexte.toLowerCase()));
-        if(enginsFiltres.length === 0) { corps.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748B; padding:20px;">Aucun engin enregistré ou ne correspond à la recherche.</td></tr>`; }
-        enginsFiltres.forEach((engin) => {
-            let badgeClass = "badge-success";
-            if (engin.statut === "Maintenance") badgeClass = "badge-warning";
-            if (engin.statut === "Critique") badgeClass = "badge-danger";
-            let tr = document.createElement('tr');
-            tr.innerHTML = `<td style="font-weight:700; color:#142746; font-size:0.9rem;">${engin.code}</td><td>${engin.modele}</td><td>${engin.heures}</td><td><span class="badge ${badgeClass}">${engin.statut}</span></td><td><button class="btn-toggle" onclick="changerStatut(${engin.id})">Statut</button><button class="btn-delete" onclick="supprimerEngin(${engin.id})">X</button></td>`;
-            corps.appendChild(tr);
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function renderApp() {
+        const parcBody = document.getElementById('parc-tbody');
+        parcBody.innerHTML = '';
+        let filter = document.getElementById('search-engin').value.toLowerCase();
+        
+        let totalEngins = db.engins.length;
+        let dispoEngins = 0;
+        let alertesCritiques = 0;
+
+        db.engins.forEach((e, idx) => {
+            if (e.statut === "Opérationnel") dispoEngins++;
+            if (e.statut === "Critique") alertesCritiques++;
+
+            if (e.code.toLowerCase().includes(filter) || e.modele.toLowerCase().includes(filter)) {
+                let badgeClass = e.statut === "Opérationnel" ? "badge-ok" : (e.statut === "Maintenance" ? "badge-maint" : "badge-crit");
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:700; color:#1C2541;">${e.code}</td>
+                    <td>${e.modele}</td>
+                    <td style="font-weight:700;">${e.heures} h ${e.heures >= 5000 ? '⚠️' : ''}</td>
+                    <td><span class="badge ${badgeClass}">${e.statut}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            ${e.statut !== 'Opérationnel' ? `<button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>` : `<button class="btn-sm btn-sm-maint" onclick="ouvrirIntervention(${idx})">Panne</button>`}
+                            <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">X</button>
+                        </div>
+                    </td>
+                `;
+                parcBody.appendChild(tr);
+            }
         });
-        document.getElementById('txt-total').innerText = total; document.getElementById('txt-dispo').innerText = dispo; document.getElementById('txt-atelier').innerText = atelier;
+
+        document.getElementById('kpi-dispo').innerText = totalEngins ? Math.round((dispoEngins / totalEngins) * 100) + "%" : "100%";
+        document.getElementById('kpi-alertes').innerText = alertesCritiques;
+        document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
+
+        const stockBody = document.getElementById('stock-tbody');
+        stockBody.innerHTML = '';
+        db.stocks.forEach(s => {
+            let tr = document.createElement('tr');
+            let alerteStock = s.qte <= 5 ? `<span class="badge badge-crit">🔥 Bas</span>` : `<span class="badge badge-ok">OK</span>`;
+            tr.innerHTML = `
+                <td style="font-weight:700;">${s.ref}</td>
+                <td>${s.nom}</td>
+                <td style="font-weight:700; color:#0091DA;">${s.qte}</td>
+                <td>${s.prix} UM</td>
+                <td>${alerteStock}</td>
+            `;
+            stockBody.appendChild(tr);
+        });
+
+        const otBody = document.getElementById('ot-tbody');
+        otBody.innerHTML = '';
+        db.ordres.forEach(o => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:700;">#OT-${o.id}</td>
+                <td style="color:#0091DA; font-weight:700;">${o.code}</td>
+                <td>${o.description}</td>
+                <td>${o.piece} (x${o.qteNecessaire})</td>
+                <td><span class="badge badge-maint">${o.etat}</span></td>
+            `;
+            otBody.appendChild(tr);
+        });
     }
-    function ajouterEngin() {
-        let code = prompt("CODE PARC :"); if (!code) return;
-        let modele = prompt("MODÈLE :"); if (!modele) return;
-        let heures = prompt("HEURES :"); if (!heures) heures = "0 h";
-        engins.push({ id: Date.now(), code: code.toUpperCase().trim(), modele: modele.trim(), heures: heures.trim(), statut: "Opérationnel" });
-        sauvegarderEtAfficher();
+
+    function simulerScanQR() {
+        let simulationCode = prompt("Entrez un code actif pour simuler le scan QR (ex: EXC-012) :");
+        if(simulationCode) {
+            document.getElementById('search-engin').value = simulationCode.trim();
+            renderApp();
+        }
     }
-    function changerStatut(id) {
-        let engin = engins.find(e => e.id === id); if (!engin) return;
-        engin.statut = engin.statut === "Opérationnel" ? "Maintenance" : (engin.statut === "Maintenance" ? "Critique" : "Opérationnel");
-        sauvegarderEtAfficher();
+
+    function simulerTelemetrieIoT() {
+        db.engins.forEach(e => {
+            e.heures += Math.floor(Math.random() * 10) + 1;
+            if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
+        });
+        alert("Données IoT synchronisées avec succès.");
+        save();
     }
-    function supprimerEngin(id) { if (confirm("Supprimer ?")) { engins = engins.filter(e => e.id !== id); sauvegarderEtAfficher(); } }
-    function filtrerEngins() { filtreTexte = document.getElementById('recherche').value; afficherTableau(); }
-    function reinitialiserParcDefaut() { if (confirm("Charger démo ?")) { engins = [...parcInitial]; sauvegarderEtAfficher(); } }
-    window.onload = afficherTableau;
+
+    function ouvrirIntervention(idx) {
+        let engin = db.engins[idx];
+        let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A, JNT-CUL-K`);
+        let qte = parseInt(prompt("Quantité nécessaire :", "1")) || 1;
+        
+        let p = db.stocks.find(item => item.ref === choixPiece);
+        if(!p) { alert("Référence invalide."); return; }
+
+        engin.statut = "Maintenance";
+        db.ordres.push({
+            id: Math.floor(100 + Math.random() * 900),
+            code: engin.code,
+            description: "Intervention corrective",
+            piece: choixPiece,
+            qteNecessaire: qte,
+            etat: "En Cours"
+        });
+        save();
+    }
+
+    function cloturerIntervention(idx) {
+        let engin = db.engins[idx];
+        let otIdx = db.ordres.findIndex(o => o.code === engin.code);
+        
+        if (otIdx !== -1) {
+            let ot = db.ordres[otIdx];
+            let pieceStock = db.stocks.find(s => s.ref === ot.piece);
+            
+            if (pieceStock) {
+                if(pieceStock.qte >= ot.qteNecessaire) {
+                    pieceStock.qte -= ot.qteNecessaire;
+                    db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
+                    db.ordres.splice(otIdx, 1);
+                    alert("Intervention clôturée, stock mis à jour et coûts imputés.");
+                } else {
+                    alert("Erreur : Stock insuffisant !");
+                    return;
+                }
+            }
+        }
+        engin.statut = "Opérationnel";
+        save();
+    }
+
+    function ajouterNouvelEngin() {
+        let code = prompt("Code Engin (ex: TR-09) :"); if (!code) return;
+        let modele = prompt("Modèle / Description :") || "Engin non spécifié";
+        db.engins.push({ code: code.toUpperCase().trim(), modele: modele.trim(), heures: 0, statut: "Opérationnel" });
+        save();
+    }
+
+    function supprimerEngin(idx) {
+        if(confirm("Supprimer cet actif du parc ?")) {
+            db.engins.splice(idx, 1);
+            save();
+        }
+    }
+
+    window.onload = renderApp;
 </script>
 </body>
 </html>
