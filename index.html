@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNIM GMAO Pro</title>
+    <title>SNIM GMAO Enterprise</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +21,6 @@
             background-color: #0b132b;
         }
 
-        /* Arrière-plan réseau industriel */
         body::before {
             content: "";
             position: fixed;
@@ -34,6 +33,75 @@
             z-index: -1;
         }
 
+        /* 🔐 ÉCRAN DE CONNEXION MODERNE */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 19, 43, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-top: 5px solid #0091DA;
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            font-size: 1.3rem;
+            color: #1C2541;
+            margin-bottom: 6px;
+        }
+
+        .auth-card p {
+            font-size: 0.75rem;
+            color: #64748B;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #F8FAFC;
+        }
+
+        .form-control:focus {
+            border-color: #0091DA;
+            background: white;
+        }
+
+        /* HEADER & BARRE DE STATUT HORS-LIGNE */
         header {
             background: rgba(18, 35, 60, 0.98);
             color: white;
@@ -52,12 +120,12 @@
         }
 
         .snim-logo {
-            width: 42px;
-            height: 42px;
+            width: 38px;
+            height: 38px;
         }
 
         .logo-text h1 {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: #FFFFFF;
             display: flex;
@@ -68,22 +136,33 @@
         .logo-text h1 .pro-badge {
             background: #0091DA;
             color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
+            font-size: 0.7rem;
+            padding: 2px 5px;
             border-radius: 4px;
             font-weight: 900;
-            letter-spacing: 0.5px;
         }
 
-        .logo-text span {
+        .user-session-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .offline-status {
             font-size: 0.65rem;
-            color: #38BDF8;
-            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 10px;
             font-weight: 700;
-            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
+        .online { background: #D1FAE5; color: #065F46; }
+        .offline { background: #FEF3C7; color: #92400E; }
 
-        /* Navigation par Onglets Tactiles */
+        /* NAVIGATION TACTILE */
         .nav-tabs {
             display: flex;
             background: #1c2541;
@@ -122,7 +201,6 @@
             padding-bottom: 5rem;
         }
 
-        /* KPI Dashboard */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -186,7 +264,7 @@
             align-items: center;
         }
 
-        /* 📡 DESIGN SYSTÈME RADAR & MAP VECTORIELLE */
+        /* RADAR MAP */
         .radar-container {
             position: relative;
             width: 100%;
@@ -199,7 +277,6 @@
             box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.3);
         }
 
-        /* Lignes de balayage du radar */
         .radar-grid {
             position: absolute;
             width: 100%;
@@ -220,7 +297,6 @@
             border-radius: 50%;
         }
 
-        /* Points géolocalisés (Blips) */
         .radar-blip {
             position: absolute;
             width: 14px;
@@ -233,15 +309,8 @@
             transition: all 0.5s ease;
         }
 
-        .blip-running {
-            background-color: #10B981; /* Vert : en fonctionnement */
-            box-shadow: 0 0 12px #10B981;
-        }
-
-        .blip-stopped {
-            background-color: #EF4444; /* Rouge : à l'arrêt/panne */
-            box-shadow: 0 0 12px #EF4444;
-        }
+        .blip-running { background-color: #10B981; box-shadow: 0 0 12px #10B981; }
+        .blip-stopped { background-color: #EF4444; box-shadow: 0 0 12px #EF4444; }
 
         .blip-label {
             position: absolute;
@@ -257,7 +326,6 @@
             font-weight: 700;
         }
 
-        /* Outils IoT et Filtrage */
         .tool-bar {
             display: flex;
             gap: 8px;
@@ -284,11 +352,8 @@
             cursor: pointer;
         }
 
-        .btn-iot {
-            background: #10B981;
-        }
+        .btn-iot { background: #10B981; }
 
-        /* Listes et Tableaux */
         .table-container {
             overflow-x: auto;
         }
@@ -313,7 +378,6 @@
             border-bottom: 1px solid #E2E8F0;
         }
 
-        /* Statuts & Badges */
         .badge {
             padding: 3px 8px;
             border-radius: 4px;
@@ -379,6 +443,32 @@
 </head>
 <body>
 
+<!-- 🔐 FENÊTRE DE CONNEXION (AUTHENTIFICATION PAR RÔLE) -->
+<div id="auth-overlay">
+    <div class="auth-card">
+        <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:50px; height:50px; margin-bottom:10px;">
+            <g transform="translate(50,53) scale(0.95)">
+                <path d="M -5,-9 L -38,-65 L -10,-65 L 12,-27 Z" fill="#38BDF8"/>
+                <path d="M 10,-1 L 72,-1 L 58,-25 L 16,-25 Z" fill="#38BDF8"/>
+                <path d="M -4,9 L -32,58 L -12,58 L 11,18 Z" fill="#38BDF8"/>
+            </g>
+        </svg>
+        <h2>Portail SNIM GMAO</h2>
+        <p>Entrez votre matricule professionnel pour vous authentifier</p>
+        <div class="form-group">
+            <label>Matricule Agent</label>
+            <input type="text" id="matricule-input" class="form-control" placeholder="ex: M-104 (Mécanicien) ou C-01 (Chef) ou D-99 (Directeur)" value="C-01">
+        </div>
+        <button class="btn-action" style="width:100%; padding:12px; background:#0091DA; font-weight:bold;" onclick="connecterUtilisateur()">Se Connecter</button>
+        <div style="margin-top:15px; font-size:0.65rem; color:#94A3B8; text-align:left; background:#F1F5F9; padding:8px; border-radius:6px;">
+            <strong>Profils de test :</strong><br>
+            • <code>M-104</code> : Mécanicien (Déclaration pannes)<br>
+            • <code>C-01</code> : Chef d'Atelier (Validation OT & Statuts)<br>
+            • <code>D-99</code> : Directeur / Admin (Accès complet & Budgets)
+        </div>
+    </div>
+</div>
+
 <header>
     <div class="logo-container">
         <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -390,8 +480,13 @@
         </svg>
         <div class="logo-text">
             <h1>SNIM GMAO <span class="pro-badge">PRO</span></h1>
-            <span>Système d'Atelier Intelligent</span>
+            <span>Centre de Contrôle Industriel</span>
         </div>
+    </div>
+    <div class="user-session-badge">
+        <span id="user-display-role">Invité</span>
+        <span id="offline-badge" class="offline-status online">🟢 En Ligne</span>
+        <button onclick="deconnecter()" style="background:none; border:none; color:#EF4444; font-weight:bold; cursor:pointer; font-size:0.7rem; margin-left:5px;">[Sortir]</button>
     </div>
 </header>
 
@@ -419,9 +514,8 @@
         </div>
     </div>
 
-    <!-- ONGLET 1 : PARC ENGINS + RADAR LIVE MAP -->
+    <!-- ONGLET 1 : RADAR FLOTTE -->
     <div id="tab-parc" class="tab-content active">
-        <!-- Carte Radar Vectorielle -->
         <div class="card">
             <h2>Suivi Cartographique Satellitaire (Live)</h2>
             <div class="radar-container" id="radar-screen">
@@ -429,7 +523,6 @@
                 <div class="radar-ring" style="width: 80px; height: 80px;"></div>
                 <div class="radar-ring" style="width: 160px; height: 160px;"></div>
                 <div class="radar-ring" style="width: 220px; height: 220px;"></div>
-                <!-- Les balises (Blips) des engins vont apparaître ici dynamiquement -->
             </div>
         </div>
 
@@ -449,7 +542,7 @@
                             <th>Modèle / Engin</th>
                             <th>Heures Moteur</th>
                             <th>Statut</th>
-                            <th>Actions</th>
+                            <th id="th-actions-header">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="parc-tbody"></tbody>
@@ -501,15 +594,16 @@
     </div>
 </main>
 
-<button class="floating-btn" onclick="ajouterNouvelEngin()">+</button>
+<button id="floating-add-btn" class="floating-btn" onclick="ajouterNouvelEngin()" style="display:none;">+</button>
 
 <footer>
-    Plateforme Industrielle SNIM GMAO Pro &copy; 2026 | Conçu par <strong>Idriss</strong>
+    Plateforme Industrielle SNIM GMAO Enterprise &copy; 2026 | Mode Hors-Ligne Actif (Offline-First)
 </footer>
 
 <script>
-    // Ajout de coordonnées géographiques relatives (x, y en %) pour placer les engins sur la map
-    let db = JSON.parse(localStorage.getItem('snim_gmao_radar_v3')) || {
+    // État global de l'application et session utilisateur
+    let currentUser = null;
+    let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v4')) || {
         engins: [
             { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40 },
             { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance", x: 70, y: 30 },
@@ -527,8 +621,51 @@
         coutTotalMRO: 15100
     };
 
+    // Gestion du réseau Hors-Ligne / En ligne automatique
+    window.addEventListener('online', mettreAJourStatutReseau);
+    window.addEventListener('offline', mettreAJourStatutReseau);
+
+    function mettreAJourStatutReseau() {
+        const badge = document.getElementById('offline-badge');
+        if (navigator.onLine) {
+            badge.className = "offline-status online";
+            badge.innerText = "🟢 En Ligne";
+        } else {
+            badge.className = "offline-status offline";
+            badge.innerText = "⚡ Mode Hors-Ligne";
+        }
+    }
+
+    function connecterUtilisateur() {
+        let matricule = document.getElementById('matricule-input').value.trim().toUpperCase();
+        if (!matricule) { alert("Veuillez entrer un matricule valide."); return; }
+
+        let role = "Mécanicien";
+        let prefix = matricule.charAt(0);
+        if (prefix === 'C') role = "Chef d'Atelier";
+        if (prefix === 'D') role = "Directeur / Admin";
+
+        currentUser = { matricule, role };
+        document.getElementById('user-display-role').innerText = `${matricule} (${role})`;
+        document.getElementById('auth-overlay').style.display = 'none';
+
+        // Restriction des privilèges selon le rôle
+        if (role === 'Directeur / Admin' || role === "Chef d'Atelier") {
+            document.getElementById('floating-add-btn').style.display = 'flex';
+        } else {
+            document.getElementById('floating-add-btn').style.display = 'none';
+        }
+
+        renderApp();
+    }
+
+    function deconnecter() {
+        currentUser = null;
+        document.getElementById('auth-overlay').style.display = 'flex';
+    }
+
     function save() {
-        localStorage.setItem('snim_gmao_radar_v3', JSON.stringify(db));
+        localStorage.setItem('snim_gmao_enterprise_v4', JSON.stringify(db));
         renderApp();
     }
 
@@ -540,11 +677,9 @@
     }
 
     function renderApp() {
-        // --- RENDU DU PARC ET DU RADAR ---
         const parcBody = document.getElementById('parc-tbody');
         const radarScreen = document.getElementById('radar-screen');
         
-        // On nettoie l'écran radar en gardant la grille et les cercles
         document.querySelectorAll('.radar-blip').forEach(el => el.remove());
         parcBody.innerHTML = '';
         
@@ -553,11 +688,12 @@
         let dispoEngins = 0;
         let alertesCritiques = 0;
 
+        let canModify = currentUser && (currentUser.role === "Chef d'Atelier" || currentUser.role === "Directeur / Admin");
+
         db.engins.forEach((e, idx) => {
             if (e.statut === "Opérationnel") dispoEngins++;
             if (e.statut === "Critique") alertesCritiques++;
 
-            // Génération de la balise radar correspondante (Blip)
             let blip = document.createElement('div');
             let isRunningClass = e.statut === "Opérationnel" ? "blip-running" : "blip-stopped";
             blip.className = `radar-blip ${isRunningClass}`;
@@ -565,39 +701,44 @@
             blip.style.top = `${e.y}%`;
             blip.innerHTML = `<span class="blip-label">${e.code}</span>`;
             
-            // Interaction au clic sur le point radar
             blip.onclick = () => {
                 document.getElementById('search-engin').value = e.code;
                 renderApp();
             };
             radarScreen.appendChild(blip);
 
-            // Filtre de recherche du tableau
             if (e.code.toLowerCase().includes(filter) || e.modele.toLowerCase().includes(filter)) {
                 let badgeClass = e.statut === "Opérationnel" ? "badge-ok" : (e.statut === "Maintenance" ? "badge-maint" : "badge-crit");
                 let tr = document.createElement('tr');
+                
+                let actionsHtml = `<td>-</td>`;
+                if (canModify) {
+                    actionsHtml = `
+                        <td>
+                            <div class="action-btns">
+                                ${e.statut !== 'Opérationnel' ? `<button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>` : `<button class="btn-sm btn-sm-maint" onclick="ouvrirIntervention(${idx})">Panne</button>`}
+                                <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">X</button>
+                            </div>
+                        </td>
+                    `;
+                }
+
                 tr.innerHTML = `
-                    <td style="font-weight:700; color:#1C2541; cursor:pointer;" onclick="focusOnMap(${e.x}, ${e.y})">📍 ${e.code}</td>
+                    <td style="font-weight:700; color:#1C2541;">📍 ${e.code}</td>
                     <td>${e.modele}</td>
-                    <td style="font-weight:700;">${e.heures} h ${e.heures >= 5000 ? '⚠️' : ''}</td>
+                    <td style="font-weight:700;">${e.heures} h</td>
                     <td><span class="badge ${badgeClass}">${e.statut}</span></td>
-                    <td>
-                        <div class="action-btns">
-                            ${e.statut !== 'Opérationnel' ? `<button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>` : `<button class="btn-sm btn-sm-maint" onclick="ouvrirIntervention(${idx})">Panne</button>`}
-                            <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">X</button>
-                        </div>
-                    </td>
+                    ${actionsHtml}
                 `;
                 parcBody.appendChild(tr);
             }
         });
 
-        // Mise à jour KPI
         document.getElementById('kpi-dispo').innerText = totalEngins ? Math.round((dispoEngins / totalEngins) * 100) + "%" : "100%";
         document.getElementById('kpi-alertes').innerText = alertesCritiques;
         document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
 
-        // --- MODULE STOCKS ---
+        // Stocks
         const stockBody = document.getElementById('stock-tbody');
         stockBody.innerHTML = '';
         db.stocks.forEach(s => {
@@ -613,7 +754,7 @@
             stockBody.appendChild(tr);
         });
 
-        // --- MODULE OT ---
+        // Ordres de Travail
         const otBody = document.getElementById('ot-tbody');
         otBody.innerHTML = '';
         db.ordres.forEach(o => {
@@ -629,23 +770,17 @@
         });
     }
 
-    // Action pour simuler la géolocalisation dynamique (mouvement sur la carte)
     function simulerTelemetrieIoT() {
         db.engins.forEach(e => {
             e.heures += Math.floor(Math.random() * 5) + 1;
-            // Si opérationnel, l'engin bouge légèrement sur la carte
             if(e.statut === "Opérationnel") {
                 e.x = Math.max(10, Math.min(90, e.x + (Math.random() * 6 - 3)));
                 e.y = Math.max(10, Math.min(90, e.y + (Math.random() * 6 - 3)));
             }
             if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
         });
-        alert("Signaux GPS & IoT synchronisés : Positions de la flotte mises à jour sur le radar.");
+        alert("Données synchronisées en local (Mode Offline-First actif).");
         save();
-    }
-
-    function focusOnMap(x, y) {
-        alert(`Centrage du radar sur les coordonnées de l'engin.`);
     }
 
     function simulerScanQR() {
@@ -689,7 +824,7 @@
                     pieceStock.qte -= ot.qteNecessaire;
                     db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
                     db.ordres.splice(otIdx, 1);
-                    alert("Intervention clôturée !");
+                    alert("Intervention clôturée et validée en local !");
                 } else {
                     alert("Erreur : Stock insuffisant !");
                     return;
@@ -703,7 +838,6 @@
     function ajouterNouvelEngin() {
         let code = prompt("Code Engin (ex: TR-09) :"); if (!code) return;
         let modele = prompt("Modèle / Description :") || "Engin non spécifié";
-        // Attribution de coordonnées aléatoires sur la carte pour le nouvel actif
         let randomX = Math.floor(Math.random() * 60) + 20;
         let randomY = Math.floor(Math.random() * 60) + 20;
         
@@ -724,8 +858,6 @@
             save();
         }
     }
-
-    window.onload = renderApp;
 </script>
 </body>
 </html>
