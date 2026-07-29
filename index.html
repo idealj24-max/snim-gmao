@@ -876,32 +876,37 @@
         }
     }
 
-    // Connexion au Cloud Supabase
-const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
-const SUPABASE_KEY = "Sb_publishable_Yo55jZq-fJ2poKtMbGRnSg_yNau5Gpb"; 
+        // 🌐 Configuration Cloud Supabase
+    const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
+    
+    // 🟢 Ta clé anon public mise à jour
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc3FleG1scHN3ZXZweWd3dHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODU4ODYsImV4cCI6MjEwMDg2MTg4Nn0.UtYBEWgfG79rkbjGptY5T0D8XZKjEv95cCL-b-gfxr8"; 
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-async function ajouterOrdreSupabase(ordre) {
-    const { data, error } = await supabaseClient
-        .from('ordres_travail')
-        .insert([
-            {
-                id: ordre.id,
-                code: ordre.code,
-                description: ordre.description,
-                piece: ordre.piece,
-                qteNecessaire: ordre.qteNecessaire,
-                etat: ordre.etat
-            }
-        ]);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    if (error) {
-        console.error("Erreur cloud :", error);
-        throw error;
-    } else {
-        console.log("Ordre enregistré sur Supabase !");
+    async function ajouterOrdreSupabase(ordre) {
+        // Note : J'ai gardé 'qteNecessaire' pour correspondre exactement à ton objet local,
+        // si ta colonne sur Supabase s'appelle 'qte_necessaire', il suffira de modifier le nom à gauche du badge.
+        const { data, error } = await supabaseClient
+            .from('ordres_travail')
+            .insert([
+                {
+                    id: ordre.id,
+                    code: ordre.code,
+                    description: ordre.description,
+                    piece: ordre.piece,
+                    qteNecessaire: ordre.qteNecessaire, 
+                    etat: ordre.etat
+                }
+            ]);
+
+        if (error) {
+            console.error("Erreur cloud Supabase :", error);
+            throw error;
+        }
+        return data;
     }
-}
+
 
 
 </script>
