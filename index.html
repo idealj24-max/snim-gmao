@@ -21,7 +21,7 @@
             background-color: #0d1b2a;
         }
 
-        /* Arrière-plan avec une image de grue en ligne + filtre sombre */
+        /* Arrière-plan mis à jour avec de vrais engins de chantier lourds + dégradé sombre */
         body::before {
             content: "";
             position: fixed;
@@ -29,8 +29,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.85) 0%, rgba(20, 35, 55, 0.85) 50%, rgba(45, 27, 20, 0.80) 100%),
-                        url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?q=80&w=1200');
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.88) 0%, rgba(20, 35, 55, 0.88) 50%, rgba(45, 35, 20, 0.85) 100%),
+                        url('https://images.unsplash.com/photo-1541625602330-2277a4c46182?q=80&w=1200');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -40,7 +40,7 @@
         header {
             background: rgba(18, 35, 60, 0.95);
             color: white;
-            padding: 0.7rem 1rem;
+            padding: 0.8rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -52,28 +52,23 @@
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
+        /* Logo modernisé et épuré directement intégré sur le fond sombre */
         .snim-logo-box {
-            width: 80px;
-            height: 46px;
-            background: #ffffff;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2px;
         }
 
         .snim-logo {
-            width: 100%;
-            height: 100%;
+            width: 48px;
+            height: 32px;
         }
 
         .logo-text h1 {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 800;
             letter-spacing: 0.5px;
             color: #FFFFFF;
@@ -313,12 +308,12 @@
 <header>
     <div class="logo-container">
         <div class="snim-logo-box">
-            <svg class="snim-logo" viewBox="0 0 130 80" xmlns="http://www.w3.org/2000/svg">
-                <text x="52" y="22" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="#000000">Snim</text>
-                <g transform="translate(12, 14)">
-                    <path d="M 0 4 L 35 4 L 22 30 L 4 16 Z" fill="#0091DA"/>
-                    <path d="M 42 6 L 82 6 L 70 20 L 35 20 Z" fill="#0091DA"/>
-                    <path d="M 28 26 L 48 14 L 22 64 L 12 54 Z" fill="#0091DA"/>
+            <!-- SVG épuré du logo SNIM directement sur fond bleu nuit -->
+            <svg class="snim-logo" viewBox="0 0 100 65" xmlns="http://www.w3.org/2000/svg">
+                <g transform="translate(5, 5)">
+                    <path d="M 0 5 L 35 5 L 22 32 L 4 18 Z" fill="#38BDF8"/>
+                    <path d="M 42 7 L 82 7 L 70 22 L 35 22 Z" fill="#38BDF8"/>
+                    <path d="M 28 28 L 48 16 L 22 64 L 12 54 Z" fill="#0091DA"/>
                 </g>
             </svg>
         </div>
@@ -394,7 +389,6 @@
         afficherTableau();
     }
 
-    // Le reste du script reste identique pour assurer le fonctionnement de la GMAO...
     function afficherTableau() {
         let corps = document.getElementById('table-corps');
         corps.innerHTML = "";
