@@ -186,6 +186,77 @@
             align-items: center;
         }
 
+        /* 📡 DESIGN SYSTÈME RADAR & MAP VECTORIELLE */
+        .radar-container {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background: radial-gradient(circle, #102a43 20%, #0b1d33 80%);
+            border: 2px solid #38BDF8;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Lignes de balayage du radar */
+        .radar-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(56,189,248,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56,189,248,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center;
+        }
+
+        .radar-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px dashed rgba(56, 189, 248, 0.25);
+            border-radius: 50%;
+        }
+
+        /* Points géolocalisés (Blips) */
+        .radar-blip {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: all 0.5s ease;
+        }
+
+        .blip-running {
+            background-color: #10B981; /* Vert : en fonctionnement */
+            box-shadow: 0 0 12px #10B981;
+        }
+
+        .blip-stopped {
+            background-color: #EF4444; /* Rouge : à l'arrêt/panne */
+            box-shadow: 0 0 12px #EF4444;
+        }
+
+        .blip-label {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: #38BDF8;
+            font-size: 0.6rem;
+            padding: 1px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
         /* Outils IoT et Filtrage */
         .tool-bar {
             display: flex;
@@ -325,7 +396,7 @@
 </header>
 
 <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('parc')">Parc Engins</button>
+    <button class="tab-btn active" onclick="switchTab('parc')">Radar Flotte</button>
     <button class="tab-btn" onclick="switchTab('stock')">Stocks MRO</button>
     <button class="tab-btn" onclick="switchTab('ot')">Ordres Travail</button>
 </div>
@@ -348,11 +419,23 @@
         </div>
     </div>
 
-    <!-- ONGLET 1 : PARC ENGINS -->
+    <!-- ONGLET 1 : PARC ENGINS + RADAR LIVE MAP -->
     <div id="tab-parc" class="tab-content active">
+        <!-- Carte Radar Vectorielle -->
+        <div class="card">
+            <h2>Suivi Cartographique Satellitaire (Live)</h2>
+            <div class="radar-container" id="radar-screen">
+                <div class="radar-grid"></div>
+                <div class="radar-ring" style="width: 80px; height: 80px;"></div>
+                <div class="radar-ring" style="width: 160px; height: 160px;"></div>
+                <div class="radar-ring" style="width: 220px; height: 220px;"></div>
+                <!-- Les balises (Blips) des engins vont apparaître ici dynamiquement -->
+            </div>
+        </div>
+
         <div class="card">
             <h2>Suivi du Matériel et Télémétrie 
-                <button class="btn-sm btn-sm-clear btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT</button>
+                <button class="btn-sm btn-sm-clear btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT GPS</button>
             </h2>
             <div class="tool-bar">
                 <input type="text" id="search-engin" class="search-input" placeholder="🔍 Scanner QR ou taper code..." oninput="renderApp()">
@@ -425,11 +508,12 @@
 </footer>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('snim_gmao_pro_v2')) || {
+    // Ajout de coordonnées géographiques relatives (x, y en %) pour placer les engins sur la map
+    let db = JSON.parse(localStorage.getItem('snim_gmao_radar_v3')) || {
         engins: [
-            { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel" },
-            { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance" },
-            { code: "BULL-005", modele: "Bulldozer Liebherr PR776", heures: 5120, statut: "Critique" }
+            { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40 },
+            { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance", x: 70, y: 30 },
+            { code: "BULL-005", modele: "Bulldozer Liebherr PR776", heures: 5120, statut: "Critique", x: 50, y: 75 }
         ],
         stocks: [
             { ref: "FIL-OIL-01", nom: "Filtre à huile gros moteur", qte: 14, prix: 4500 },
@@ -444,7 +528,7 @@
     };
 
     function save() {
-        localStorage.setItem('snim_gmao_pro_v2', JSON.stringify(db));
+        localStorage.setItem('snim_gmao_radar_v3', JSON.stringify(db));
         renderApp();
     }
 
@@ -456,10 +540,15 @@
     }
 
     function renderApp() {
+        // --- RENDU DU PARC ET DU RADAR ---
         const parcBody = document.getElementById('parc-tbody');
-        parcBody.innerHTML = '';
-        let filter = document.getElementById('search-engin').value.toLowerCase();
+        const radarScreen = document.getElementById('radar-screen');
         
+        // On nettoie l'écran radar en gardant la grille et les cercles
+        document.querySelectorAll('.radar-blip').forEach(el => el.remove());
+        parcBody.innerHTML = '';
+        
+        let filter = document.getElementById('search-engin').value.toLowerCase();
         let totalEngins = db.engins.length;
         let dispoEngins = 0;
         let alertesCritiques = 0;
@@ -468,11 +557,27 @@
             if (e.statut === "Opérationnel") dispoEngins++;
             if (e.statut === "Critique") alertesCritiques++;
 
+            // Génération de la balise radar correspondante (Blip)
+            let blip = document.createElement('div');
+            let isRunningClass = e.statut === "Opérationnel" ? "blip-running" : "blip-stopped";
+            blip.className = `radar-blip ${isRunningClass}`;
+            blip.style.left = `${e.x}%`;
+            blip.style.top = `${e.y}%`;
+            blip.innerHTML = `<span class="blip-label">${e.code}</span>`;
+            
+            // Interaction au clic sur le point radar
+            blip.onclick = () => {
+                document.getElementById('search-engin').value = e.code;
+                renderApp();
+            };
+            radarScreen.appendChild(blip);
+
+            // Filtre de recherche du tableau
             if (e.code.toLowerCase().includes(filter) || e.modele.toLowerCase().includes(filter)) {
                 let badgeClass = e.statut === "Opérationnel" ? "badge-ok" : (e.statut === "Maintenance" ? "badge-maint" : "badge-crit");
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight:700; color:#1C2541;">${e.code}</td>
+                    <td style="font-weight:700; color:#1C2541; cursor:pointer;" onclick="focusOnMap(${e.x}, ${e.y})">📍 ${e.code}</td>
                     <td>${e.modele}</td>
                     <td style="font-weight:700;">${e.heures} h ${e.heures >= 5000 ? '⚠️' : ''}</td>
                     <td><span class="badge ${badgeClass}">${e.statut}</span></td>
@@ -487,10 +592,12 @@
             }
         });
 
+        // Mise à jour KPI
         document.getElementById('kpi-dispo').innerText = totalEngins ? Math.round((dispoEngins / totalEngins) * 100) + "%" : "100%";
         document.getElementById('kpi-alertes').innerText = alertesCritiques;
         document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
 
+        // --- MODULE STOCKS ---
         const stockBody = document.getElementById('stock-tbody');
         stockBody.innerHTML = '';
         db.stocks.forEach(s => {
@@ -506,6 +613,7 @@
             stockBody.appendChild(tr);
         });
 
+        // --- MODULE OT ---
         const otBody = document.getElementById('ot-tbody');
         otBody.innerHTML = '';
         db.ordres.forEach(o => {
@@ -521,21 +629,31 @@
         });
     }
 
+    // Action pour simuler la géolocalisation dynamique (mouvement sur la carte)
+    function simulerTelemetrieIoT() {
+        db.engins.forEach(e => {
+            e.heures += Math.floor(Math.random() * 5) + 1;
+            // Si opérationnel, l'engin bouge légèrement sur la carte
+            if(e.statut === "Opérationnel") {
+                e.x = Math.max(10, Math.min(90, e.x + (Math.random() * 6 - 3)));
+                e.y = Math.max(10, Math.min(90, e.y + (Math.random() * 6 - 3)));
+            }
+            if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
+        });
+        alert("Signaux GPS & IoT synchronisés : Positions de la flotte mises à jour sur le radar.");
+        save();
+    }
+
+    function focusOnMap(x, y) {
+        alert(`Centrage du radar sur les coordonnées de l'engin.`);
+    }
+
     function simulerScanQR() {
         let simulationCode = prompt("Entrez un code actif pour simuler le scan QR (ex: EXC-012) :");
         if(simulationCode) {
             document.getElementById('search-engin').value = simulationCode.trim();
             renderApp();
         }
-    }
-
-    function simulerTelemetrieIoT() {
-        db.engins.forEach(e => {
-            e.heures += Math.floor(Math.random() * 10) + 1;
-            if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
-        });
-        alert("Données IoT synchronisées avec succès.");
-        save();
     }
 
     function ouvrirIntervention(idx) {
@@ -571,7 +689,7 @@
                     pieceStock.qte -= ot.qteNecessaire;
                     db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
                     db.ordres.splice(otIdx, 1);
-                    alert("Intervention clôturée, stock mis à jour et coûts imputés.");
+                    alert("Intervention clôturée !");
                 } else {
                     alert("Erreur : Stock insuffisant !");
                     return;
@@ -585,7 +703,18 @@
     function ajouterNouvelEngin() {
         let code = prompt("Code Engin (ex: TR-09) :"); if (!code) return;
         let modele = prompt("Modèle / Description :") || "Engin non spécifié";
-        db.engins.push({ code: code.toUpperCase().trim(), modele: modele.trim(), heures: 0, statut: "Opérationnel" });
+        // Attribution de coordonnées aléatoires sur la carte pour le nouvel actif
+        let randomX = Math.floor(Math.random() * 60) + 20;
+        let randomY = Math.floor(Math.random() * 60) + 20;
+        
+        db.engins.push({ 
+            code: code.toUpperCase().trim(), 
+            modele: modele.trim(), 
+            heures: 0, 
+            statut: "Opérationnel",
+            x: randomX,
+            y: randomY
+        });
         save();
     }
 
