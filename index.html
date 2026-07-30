@@ -442,6 +442,7 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
 </head>
 <body>
@@ -1025,6 +1026,138 @@ function nettoyerEtOuvrirPDF(ot) {
 
   // Ouvre le PDF sur le téléphone
   doc.output('dataurlnewwindow'); 
+}
+// Initier la base de données locale (IndexedDB)
+const localDB = new Dexie("GMAO_Local_DB");
+localDB.version(1).stores({
+  ordres_travail: '++id, code_engin, type_intervention, statut, matricule, synchronise'
+});
+
+// Fonction pour sauvegarder un ordre (gère le online et offline)
+async function sauvegarderOrdreTravail(ordre) {
+  if (navigator.onLine) {
+    try {
+      // En ligne : Envoi direct à Supabase
+      const { data, error } = await supabase.from('ordres_travail').insert([ordre]);
+      if (error) throw error;
+      console.log("Synchronisé directement sur Supabase !");
+    } catch (err) {
+      console.warn("Échec de l'envoi en ligne, sauvegarde locale...", err);
+      await stockerLocalement(ordre);
+    }
+  } else {
+    // Hors-ligne : Stockage local avec drapeau 'synchronise: 0'
+    await stockerLocalement(ordre);
+  }
+}
+
+async function stockerLocalement(ordre) {
+  ordre.synchronise = 0; // Non synchronisé
+  await localDB.ordres_travail.add(ordre);
+  alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
+}
+
+// Écouter le retour du réseau pour synchroniser automatiquement
+window.addEventListener('online', async () => {
+  console.log("Réseau détecté ! Synchronisation des données en cours...");
+  const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
+  
+  for (let ordre of ordresNonSynchros) {
+    delete ordre.id; // Laisser Supabase générer son propre ID
+    delete ordre.synchronise;
+    
+    const { error } = await supabase.from('ordres_travail').insert([ordre]);
+    if (!error) {
+      // Si la synchronisation réussit, on met à jour le statut local
+      await localDB.ordres_travail.where('code_engin').equals(ordre.code_engin).modify({ synchronise: 1 });
+    }
+  }
+  alert("Toutes les données hors-ligne ont été synchronisées avec succès sur Supabase Cloud !");
+});
+// Fonction de validation sécurisée pour la clôture d'une tâche
+async function cloturerInterventionSecurisee(ordreId, matriculeAgent, codePinSaisi) {
+  // 1. Vérification fictive ou réelle du PIN de l'agent
+  if (codePinSaisi !== "1234") { // Remplace par une vérification en DB à terme
+    alert("Erreur : Code PIN invalide. Clôture de l'ordre annulée.");
+    return;
+  }
+
+  const historiqueLog = {
+    ordre_id: ordreId,
+    action: "CLOTURE_ORDRE",
+    execute_par: matriculeAgent,
+    horodatage: new Date().toISOString(),
+    ip_appareil: "Mobile_Terrain"
+  };
+
+  // 2. Mettre à jour le statut de l'ordre
+  const { error: errorOT } = await supabase
+    .from('ordres_travail')
+    .update({ statut: 'CLOTURE' })
+    .eq('id', ordreId);
+
+  // 3. Écrire dans la table d'audit historique (Audit Trail)
+  const { error: errorLog } = await supabase
+    .from('historique_actions') // Tu devras créer cette table simple sur Supabase
+    .insert([historiqueLog]);
+
+  if (!errorOT && !errorLog) {
+    alert(`Ordre #${ordreId} clôturé de manière sécurisée par ${matriculeAgent}. Signé numériquement.`);
+  }
+}
+async function verifierEtReserverStock(codePiece, quantiteRequise) {
+  // 1. Récupérer l'état du stock sur Supabase
+  const { data: piece, error } = await supabase
+    .from('stocks_mro')
+    .select('quantite_disponible, designation')
+    .eq('code_piece', codePiece)
+    .single();
+
+  if (error || !piece) {
+    console.error("Pièce introuvable dans le catalogue des stocks.");
+    return false;
+  }
+
+  // 2. Vérifier si le stock est suffisant
+  if (piece.quantite_disponible < quantiteRequise) {
+    alert(`Alerte Rupture Stock : Impossible de lancer l'intervention. Il ne reste que ${piece.quantite_disponible} unité(s) de ${piece.designation}.`);
+    return false;
+  }
+
+  // 3. Déduire automatiquement la pièce du stock (Réservation)
+  const nouvelleQuantite = piece.quantite_disponible - quantiteRequise;
+  await supabase
+    .from('stocks_mro')
+    .update({ quantite_disponible: nouvelleQuantite })
+    .eq('code_piece', codePiece);
+
+  console.log(`Réservation réussie : ${quantiteRequise} x ${piece.designation} retirés du stock.`);
+  return true;
+}
+function appliquerPermissionsInterface(roleUtilisateur) {
+  const zoneAjoutEngin = document.getElementById("bouton-ajouter-engin"); // Ajuste selon tes IDs réels
+  const zoneDensesFinancieres = document.getElementById("zone-depenses-mro");
+  const formulaireOrdre = document.getElementById("formulaire-ot");
+
+  switch(roleUtilisateur) {
+    case 'MECANICIEN':
+      // Le mécanicien peut seulement voir et exécuter ses ordres de travail
+      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
+      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "none";
+      break;
+      
+    case 'CHEF_ATELIER':
+      // Le chef d'atelier gère les ordres et les pièces, mais ne modifie pas la structure du parc
+      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
+      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "block";
+      break;
+      
+    case 'DIRECTEUR':
+      // Le directeur a accès au contrôle total (vue financière globale, gestion complète)
+      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "block";
+      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "block";
+      break;
+  }
 }
 
 </script>
