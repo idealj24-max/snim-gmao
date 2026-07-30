@@ -441,6 +441,8 @@
         footer strong { color: #38BDF8; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
 <body>
 
@@ -919,6 +921,112 @@
 
     // Lancement de l'application par défaut
     renderApp();
+// ==========================================
+// SYSTÈME DE MAINTENANCE PRÉVENTIVE AUTOMATIQUE
+// ==========================================
+let intervalleBip;
+let audioCtx = null;
+
+// 1. Écouter en temps réel l'insertion d'ordres générés par le SYSTEM
+supabase
+  .channel('table-db-changes')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ordres_travail' }, payload => {
+    const nouvelOT = payload.new;
+    
+    // Si l'ordre vient du système automatique
+    if (nouvelOT.matricule === 'SYSTEM') {
+      declencherAlerteUrgente(nouvelOT);
+    }
+  })
+  .subscribe();
+
+// 2. Gestion des bips et vibrations (5 répétitions espacées de 4s, arrêt au toucher)
+function declencherAlerteUrgente(ot) {
+  let repetitions = 0;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function emettreBipEtVibration() {
+    if (repetitions >= 5) {
+      arreterAlerte();
+      nettoyerEtOuvrirPDF(ot);
+      return;
+    }
+
+    // Vibration du téléphone
+    if (navigator.vibrate) {
+      navigator.vibrate(500); // 500ms de vibration
+    }
+
+    // Bip sonore industriel
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3); // Durée du bip : 300ms
+
+    repetitions++;
+  }
+
+  // Lancement du cycle
+  emettreBipEtVibration();
+  intervalleBip = setInterval(emettreBipEtVibration, 4000);
+
+  // Arrêt immédiat dès que l'agent touche l'écran
+  window.addEventListener('touchstart', () => {
+    arreterAlerte();
+    nettoyerEtOuvrirPDF(ot);
+  }, { once: true });
+}
+
+function readme_stop_alerte() {
+  clearInterval(intervalleBip);
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
+function arreterAlerte() {
+  clearInterval(intervalleBip);
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
+// 3. Génération instantanée et ouverture du PDF d'intervention
+function nettoyerEtOuvrirPDF(ot) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // En-tête industriel rouge alerte
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(231, 76, 60); 
+  doc.text("SNIM GMAO - INTERVENTION PRÉVENTIVE CRITIQUE", 14, 20);
+
+  doc.setDrawColor(150);
+  doc.line(14, 25, 196, 25);
+
+  // Contenu technique
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.text(`Identifiant Ordre : #OT-${ot.id || 'AUTO'}`, 14, 40);
+  doc.text(`Code Engin Concerné : ${ot.code_engin}`, 14, 50);
+  doc.text(`Type d'Intervention : ${ot.type_intervention}`, 14, 60);
+  doc.text(`Pièces Matérielles Requises : ${ot.piece_assignee || 'FIL-OIL-01 (x2)'}`, 14, 70);
+  doc.text(`Priorité : Haute (Générée par Nécessité Système)`, 14, 80);
+
+  // Consignes terrain
+  doc.setFont("helvetica", "italic");
+  doc.text("Instructions pour le Chef d'Équipe :", 14, 100);
+  doc.setFont("helvetica", "normal");
+  doc.text("- Imprimer cette fiche pour le mécanicien assigné.", 14, 110);
+  doc.text("- Sortir les pièces associées des stocks MRO.", 14, 120);
+  doc.text("- Clôturer l'ordre dans l'application une fois la vidange effectuée.", 14, 130);
+
+  // Ouvre le PDF sur le téléphone
+  doc.output('dataurlnewwindow'); 
+}
+
 </script>
 </body>
 </html>
