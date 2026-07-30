@@ -444,7 +444,7 @@
 </head>
 <body>
 
-<!-- 🔐 FENÊTRE DE CONNEXION (AUTHENTIFICATION PAR RÔLE) -->
+<!-- 🔐 FENÊTRE DE CONNEXION -->
 <div id="auth-overlay">
     <div class="auth-card">
         <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:50px; height:50px; margin-bottom:10px;">
@@ -515,7 +515,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 1 : RADAR FLOTTE -->
+    <!-- RADAR FLOTTE -->
     <div id="tab-parc" class="tab-content active">
         <div class="card">
             <h2>Suivi Cartographique Satellitaire (Live)</h2>
@@ -552,7 +552,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : STOCKS MRO -->
+    <!-- STOCKS MRO -->
     <div id="tab-stock" class="tab-content">
         <div class="card">
             <h2>Magasin des Pièces Détachées</h2>
@@ -573,7 +573,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 3 : ORDRES DE TRAVAIL -->
+    <!-- ORDRES DE TRAVAIL -->
     <div id="tab-ot" class="tab-content">
         <div class="card">
             <h2>Ordres de Travail (OT) en cours</h2>
@@ -598,11 +598,15 @@
 <button id="floating-add-btn" class="floating-btn" onclick="ajouterNouvelEngin()" style="display:none;">+</button>
 
 <footer>
-    Plateforme Industrielle SNIM GMAO Enterprise &copy; 2026 | Mode Hors-Ligne Actif (Offline-First)
+    Plateforme Industrielle SNIM GMAO Enterprise &copy; 2026 | Mode Hybride Cloud & Hors-Ligne
 </footer>
 
 <script>
-    // État global de l'application et session utilisateur
+    // Configuration Cloud Supabase
+    const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc3FleG1scHN3ZXZweWd3dHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODU4ODYsImV4cCI6MjEwMDg2MTg4Nn0.UtYBEWgfG79rkbjGptY5T0D8XZKjEv95cCL-b-gfxr8"; 
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let currentUser = null;
     let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v4')) || {
         engins: [
@@ -622,7 +626,6 @@
         coutTotalMRO: 15100
     };
 
-    // Gestion du réseau Hors-Ligne / En ligne automatique
     window.addEventListener('online', mettreAJourStatutReseau);
     window.addEventListener('offline', mettreAJourStatutReseau);
 
@@ -650,7 +653,6 @@
         document.getElementById('user-display-role').innerText = `${matricule} (${role})`;
         document.getElementById('auth-overlay').style.display = 'none';
 
-        // Restriction des privilèges selon le rôle
         if (role === 'Directeur / Admin' || role === "Chef d'Atelier") {
             document.getElementById('floating-add-btn').style.display = 'flex';
         } else {
@@ -674,7 +676,7 @@
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
     }
 
     function renderApp() {
@@ -739,7 +741,7 @@
         document.getElementById('kpi-alertes').innerText = alertesCritiques;
         document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
 
-        // Stocks
+        // Table Stocks
         const stockBody = document.getElementById('stock-tbody');
         stockBody.innerHTML = '';
         db.stocks.forEach(s => {
@@ -755,7 +757,7 @@
             stockBody.appendChild(tr);
         });
 
-        // Ordres de Travail
+        // Table Ordres de Travail
         const otBody = document.getElementById('ot-tbody');
         otBody.innerHTML = '';
         db.ordres.forEach(o => {
@@ -771,7 +773,7 @@
         });
     }
 
-    function simulerTelemetrieIoT() {
+    async function simulerTelemetrieIoT() {
         db.engins.forEach(e => {
             e.heures += Math.floor(Math.random() * 5) + 1;
             if(e.statut === "Opérationnel") {
@@ -780,8 +782,29 @@
             }
             if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
         });
-        alert("Données synchronisées en local (Mode Offline-First actif).");
+        
         save();
+
+        if (navigator.onLine) {
+            try {
+                // Synchronisation groupée des engins vers Supabase
+                for (let engin of db.engins) {
+                    await supabaseClient.from('engins').upsert({
+                        code: engin.code,
+                        modele: engin.modele,
+                        heures: engin.heures,
+                        statut: engin.statut,
+                        x_coord: engin.x,
+                        y_coord: engin.y
+                    }, { onConflict: 'code' });
+                }
+                alert("📡 Télémétrie IoT mise à jour et synchronisée en temps réel sur Supabase Cloud !");
+            } catch (err) {
+                console.error("Échec de synchro Cloud :", err);
+            }
+        } else {
+            alert("⚡ IoT enregistré en local (Hors-ligne).");
+        }
     }
 
     function simulerScanQR() {
@@ -792,41 +815,59 @@
         }
     }
 
-   async function ouvrirIntervention(idx) {
-    let engin = db.engins[idx];
-    let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A...`);
-    let qte = parseInt(prompt("Quantité nécessaire :", "1")) || 1;
+    async function ajouterOrdreSupabase(ordre) {
+        // Adaptation des clés JS aux colonnes SQL (snake_case)
+        const { data, error } = await supabaseClient
+            .from('ordres_travail')
+            .insert([
+                {
+                    id: ordre.id,
+                    code_engin: ordre.code,
+                    description: ordre.description,
+                    piece_ref: ordre.piece,
+                    qte_necessaire: ordre.qteNecessaire, 
+                    etat: ordre.etat
+                }
+            ]);
 
-    let p = db.stocks.find(item => item.ref === choixPiece);
-    if(!p) {
-        alert("Référence invalide.");
-        return;
+        if (error) throw error;
+        return data;
     }
 
-    engin.statut = "Maintenance";
+    async function ouvrirIntervention(idx) {
+        let engin = db.engins[idx];
+        let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A...`);
+        if (!choixPiece) return;
+        
+        let qte = parseInt(prompt("Quantité nécessaire :", "1")) || 1;
+        let p = db.stocks.find(item => item.ref === choixPiece);
+        
+        if(!p) { alert("Référence invalide."); return; }
 
-    const nouvelOrdre = {
-        id: Math.floor(100 + Math.random() * 900),
-        code: engin.code,
-        description: "Intervention corrective",
-        piece: choixPiece,
-        qteNecessaire: qte,
-        etat: "En cours"
-    };
+        engin.statut = "Maintenance";
 
-    db.ordres.push(nouvelOrdre);
-    save();
+        const nouvelOrdre = {
+            id: Math.floor(100 + Math.random() * 900),
+            code: engin.code,
+            description: "Intervention corrective",
+            piece: choixPiece,
+            qteNecessaire: qte,
+            etat: "En cours"
+        };
 
-    try {
-        await ajouterOrdreSupabase(nouvelOrdre);
-        alert("Ordre synchronisé avec Supabase !");
-    } catch (error) {
-        console.error("Erreur de synchro :", error);
+        db.ordres.push(nouvelOrdre);
+        save();
+
+        if (navigator.onLine) {
+            try {
+                await ajouterOrdreSupabase(nouvelOrdre);
+                alert("✅ Ordre créé localement et inséré sur Supabase !");
+            } catch (error) {
+                console.error("Erreur cloud :", error);
+                alert("⚠️ Enregistré en local, échec de la liaison Cloud (Vérifie tes colonnes SQL).");
+            }
+        }
     }
-
-    renderApp();
-}
-
 
     function cloturerIntervention(idx) {
         let engin = db.engins[idx];
@@ -841,7 +882,7 @@
                     pieceStock.qte -= ot.qteNecessaire;
                     db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
                     db.ordres.splice(otIdx, 1);
-                    alert("Intervention clôturée et validée en local !");
+                    alert("Intervention clôturée et validée !");
                 } else {
                     alert("Erreur : Stock insuffisant !");
                     return;
@@ -876,39 +917,8 @@
         }
     }
 
-        // 🌐 Configuration Cloud Supabase
-    const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
-    
-    // 🟢 Ta clé anon public mise à jour
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc3FleG1scHN3ZXZweWd3dHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODU4ODYsImV4cCI6MjEwMDg2MTg4Nn0.UtYBEWgfG79rkbjGptY5T0D8XZKjEv95cCL-b-gfxr8"; 
-
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    async function ajouterOrdreSupabase(ordre) {
-        // Note : J'ai gardé 'qteNecessaire' pour correspondre exactement à ton objet local,
-        // si ta colonne sur Supabase s'appelle 'qte_necessaire', il suffira de modifier le nom à gauche du badge.
-        const { data, error } = await supabaseClient
-            .from('ordres_travail')
-            .insert([
-                {
-                    id: ordre.id,
-                    code: ordre.code,
-                    description: ordre.description,
-                    piece: ordre.piece,
-                    qteNecessaire: ordre.qteNecessaire, 
-                    etat: ordre.etat
-                }
-            ]);
-
-        if (error) {
-            console.error("Erreur cloud Supabase :", error);
-            throw error;
-        }
-        return data;
-    }
-
-
-
+    // Lancement de l'application par défaut
+    renderApp();
 </script>
 </body>
 </html>
