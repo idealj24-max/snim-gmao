@@ -212,7 +212,7 @@
             grid-template-columns: 1fr;
         }
 
-        .stats-card {
+        .stat-card {
             background: rgba(255, 255, 255, 0.98);
             padding: 12px 10px;
             border-radius: 10px;
@@ -445,6 +445,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <!-- Script pour le scan QR Réel par caméra arrière -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
 
@@ -604,6 +606,15 @@
     </div>
 </main>
 
+<!-- 📷 INJECTION DE LA MODALE DU SCANNER CAMERA QR CODE -->
+<div id="qr-reader-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; text-align: center;">
+        <h3 style="color: #1C2541; margin-bottom: 15px;">Scanner le Code Engin</h3>
+        <div id="reader" style="width: 100%; background: #000; border-radius: 8px; overflow: hidden;"></div>
+        <button class="btn-action" style="background: #EF4444; width: 100%; margin-top: 15px; padding: 12px; font-weight: bold;" onclick="fermerScannerQR()">Annuler / Fermer</button>
+    </div>
+</div>
+
 <button id="floating-add-btn" class="floating-btn" onclick="ajouterNouvelEngin()" style="display:none;">+</button>
 
 <footer>
@@ -617,6 +628,8 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
+    let html5QrcodeScanner = null;
+
     let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v4')) || {
         engins: [
             { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40 },
@@ -635,7 +648,15 @@
         coutTotalMRO: 15100
     };
 
-    window.addEventListener('online', mettreAJourStatutReseau);
+    const localDB = new Dexie("GMAO_Local_DB");
+    localDB.version(1).stores({
+      ordres_travail: '++id, code_engin, type_intervention, statut, matricule, synchronise'
+    });
+
+    window.addEventListener('online', () => {
+        mettreAJourStatutReseau();
+        synchroniserDonneesBidirectionnel();
+    });
     window.addEventListener('offline', mettreAJourStatutReseau);
 
     function mettreAJourStatutReseau() {
@@ -816,11 +837,42 @@
         }
     }
 
+    // 📷 OUVERTURE DU SCANNER QR RÉEL VIA FLUX CAMÉRA ARRIÈRE
     function simulerScanQR() {
-        let simulationCode = prompt("Entrez un code actif pour simuler le scan QR (ex: EXC-012) :");
-        if(simulationCode) {
-            document.getElementById('search-engin').value = simulationCode.trim();
-            renderApp();
+        const modal = document.getElementById('qr-reader-modal');
+        modal.style.display = 'flex';
+
+        html5QrcodeScanner = new Html5Qrcode("reader");
+
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+            },
+            (qrCodeMessage) => {
+                document.getElementById('search-engin').value = qrCodeMessage.trim();
+                fermerScannerQR();
+                renderApp();
+                alert(`🔍 Engin détecté : ${qrCodeMessage}`);
+            },
+            (errorMessage) => {
+                // Ignore continue tracking errors
+            }
+        ).catch((err) => {
+            console.error("Impossible d'accéder à la caméra : ", err);
+            alert("Erreur d'accès à la caméra. Vérifiez les autorisations de votre navigateur.");
+            fermerScannerQR();
+        });
+    }
+
+    function fermerScannerQR() {
+        const modal = document.getElementById('qr-reader-modal');
+        modal.style.display = 'none';
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner = null;
+            }).catch(err => console.error("Erreur à l'arrêt de la caméra", err));
         }
     }
 
@@ -866,15 +918,13 @@
         db.ordres.push(nouvelOrdre);
         save();
 
-        if (navigator.onLine) {
-            try {
-                await ajouterOrdreSupabase(nouvelOrdre);
-                alert("✅ Ordre créé localement et inséré sur Supabase !");
-            } catch (error) {
-                console.error("Erreur cloud :", error);
-                alert("⚠️ Enregistré en local, échec de la liaison Cloud (Vérifie tes colonnes SQL).");
-            }
-        }
+        await sauvegarderOrdreTravail({
+            id: nouvelOrdre.id,
+            code_engin: nouvelOrdre.code,
+            type_intervention: nouvelOrdre.description,
+            statut: nouvelOrdre.etat,
+            matricule: currentUser ? currentUser.matricule : 'UNKNOWN'
+        });
     }
 
     function cloturerIntervention(idx) {
@@ -1058,15 +1108,77 @@ function nettoyerEtOuvrirPDF(ot) {
   doc.output('dataurlnewwindow'); 
 }
 
-const localDB = new Dexie("GMAO_Local_DB");
-localDB.version(1).stores({
-  ordres_travail: '++id, code_engin, type_intervention, statut, matricule, synchronise'
-});
+// 🔄 2. SYNCHRONISATION BIDIRECTIONNELLE ROBUSTE (CLOUD ↔ LOCAL)
+async function synchroniserDonneesBidirectionnel() {
+    if (!navigator.onLine) {
+        console.log("Synchro impossible : l'appareil est déconnecté.");
+        return;
+    }
+
+    console.log("🔄 Lancement de la synchronisation bidirectionnelle...");
+
+    try {
+        // --- ÉTAPE A : PULL (Récupérer les mises à jour globales du Cloud) ---
+        const { data: ordresCloud, error: errCloud } = await supabaseClient
+            .from('ordres_travail')
+            .select('*');
+
+        if (errCloud) throw errCloud;
+
+        if (ordresCloud) {
+            for (let ordreC of ordresCloud) {
+                const localOrdre = await localDB.ordres_travail.get({ code_engin: ordreC.code_engin });
+
+                if (!localOrdre) {
+                    ordreC.synchronise = 1;
+                    await localDB.ordres_travail.add(ordreC);
+                } else if (localOrdre.synchronise === 0) {
+                    // CONFLIT : Règle de résolution (Le Cloud écrase la modification locale)
+                    await localDB.ordres_travail.update(localOrdre.id, {
+                        type_intervention: ordreC.type_intervention,
+                        statut: ordreC.statut,
+                        matricule: ordreC.matricule,
+                        synchronise: 1
+                    });
+                    console.log(`⚠️ Conflit résolu pour l'engin ${ordreC.code_engin} : Version Cloud prioritaire.`);
+                }
+            }
+        }
+
+        // --- ÉTAPE B : PUSH (Envoyer les modifications locales non synchronisées) ---
+        const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
+        
+        for (let ordreL of ordresNonSynchros) {
+            const backupId = ordreL.id;
+            delete ordreL.id; 
+            delete ordreL.synchronise;
+
+            const { error: errPush } = await supabaseClient
+                .from('ordres_travail')
+                .upsert({
+                    code_engin: ordreL.code_engin,
+                    type_intervention: ordreL.type_intervention,
+                    statut: ordreL.statut,
+                    matricule: ordreL.matricule
+                }, { onConflict: 'code_engin' });
+
+            if (!errPush) {
+                await localDB.ordres_travail.update(backupId, { synchronise: 1 });
+            }
+        }
+
+        console.log("✅ Synchronisation bidirectionnelle terminée avec succès !");
+        renderApp();
+
+    } catch (error) {
+        console.error("Échec de la synchronisation bidirectionnelle :", error);
+    }
+}
 
 async function sauvegarderOrdreTravail(ordre) {
   if (navigator.onLine) {
     try {
-      const { data, error } = await supabaseClient.from('ordres_travail').insert([ordre]);
+      const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
       if (error) throw error;
       console.log("Synchronisé directement sur Supabase !");
     } catch (err) {
@@ -1083,22 +1195,6 @@ async function stockerLocalement(ordre) {
   await localDB.ordres_travail.add(ordre);
   alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
 }
-
-window.addEventListener('online', async () => {
-  console.log("Réseau détecté ! Synchronisation des données en cours...");
-  const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
-  
-  for (let ordre of ordresNonSynchros) {
-    delete ordre.id; 
-    delete ordre.synchronise;
-    
-    const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
-    if (!error) {
-      await localDB.ordres_travail.where('code_engin').equals(ordre.code_engin).modify({ synchronise: 1 });
-    }
-  }
-  alert("Toutes les données hors-ligne ont été synchronisées avec succès sur Supabase Cloud !");
-});
 
 async function cloturerInterventionSecurisee(ordreId, matriculeAgent, codePinSaisi) {
   if (codePinSaisi !== "1234") {
