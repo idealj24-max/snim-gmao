@@ -445,7 +445,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-    <!-- Script pour le scan QR Réel par caméra arrière -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
@@ -562,7 +561,6 @@
     <div id="tab-stock" class="tab-content">
         <div class="card">
             <h2>Magasin des Pièces Détachées</h2>
-            <!-- Barre de recherche dynamique pour les stocks -->
             <div style="padding: 10px 0;">
                 <input type="text" id="recherche-magasin" placeholder="🔍 Rechercher une référence ou pièce..." 
                        style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; box-sizing: border-box; background-color: #ffffff; color: #000000;">
@@ -606,7 +604,7 @@
     </div>
 </main>
 
-<!-- 📷 INJECTION DE LA MODALE DU SCANNER CAMERA QR CODE -->
+<!-- 📷 MODALE SCANNER CAMERA -->
 <div id="qr-reader-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; text-align: center;">
         <h3 style="color: #1C2541; margin-bottom: 15px;">Scanner le Code Engin</h3>
@@ -622,13 +620,14 @@
 </footer>
 
 <script>
-    // Configuration Cloud Supabase
     const SUPABASE_URL = "https://iesqexmlpswevpygwtzj.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllc3FleG1scHN3ZXZweWd3dHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyODU4ODYsImV4cCI6MjEwMDg2MTg4Nn0.UtYBEWgfG79rkbjGptY5T0D8XZKjEv95cCL-b-gfxr8"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
     let html5QrcodeScanner = null;
+    let intervalleBip;
+    let audioCtx = null;
 
     let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v4')) || {
         engins: [
@@ -670,6 +669,17 @@
         }
     }
 
+    function appliquerPermissionsInterface(roleUtilisateur) {
+        const zoneAjoutEngin = document.getElementById("floating-add-btn"); 
+        if (!zoneAjoutEngin) return;
+        
+        if (roleUtilisateur === "Directeur / Admin" || roleUtilisateur === "Chef d'Atelier" || roleUtilisateur === "DIRECTEUR") {
+            zoneAjoutEngin.style.display = "flex";
+        } else {
+            zoneAjoutEngin.style.display = "none";
+        }
+    }
+
     function connecterUtilisateur() {
         let matricule = document.getElementById('matricule-input').value.trim().toUpperCase();
         if (!matricule) { alert("Veuillez entrer un matricule valide."); return; }
@@ -683,12 +693,7 @@
         document.getElementById('user-display-role').innerText = `${matricule} (${role})`;
         document.getElementById('auth-overlay').style.display = 'none';
 
-        if (role === 'Directeur / Admin' || role === "Chef d'Atelier") {
-            document.getElementById('floating-add-btn').style.display = 'flex';
-        } else {
-            document.getElementById('floating-add-btn').style.display = 'none';
-        }
-
+        appliquerPermissionsInterface(role);
         renderApp();
     }
 
@@ -783,7 +788,7 @@
                 <td>${s.nom}</td>
                 <td style="font-weight:700; color:#0091DA;">${s.qte}</td>
                 <td>${s.prix} UM</td>
-                <td>${alerteStock}</td>
+                <td>${erteStock || alerteStock}</td>
             `;
             stockBody.appendChild(tr);
         });
@@ -828,7 +833,7 @@
                         y_coord: engin.y
                     }, { onConflict: 'code' });
                 }
-                alert("📡 Télémétrie IoT mise à jour et synchronisée en temps réel sur Supabase Cloud !");
+                alert("📡 Télémétrie IoT mise à jour et synchronisée sur Supabase Cloud !");
             } catch (err) {
                 console.error("Échec de synchro Cloud :", err);
             }
@@ -837,31 +842,24 @@
         }
     }
 
-    // 📷 OUVERTURE DU SCANNER QR RÉEL VIA FLUX CAMÉRA ARRIÈRE
     function simulerScanQR() {
         const modal = document.getElementById('qr-reader-modal');
         modal.style.display = 'flex';
-
         html5QrcodeScanner = new Html5Qrcode("reader");
 
         html5QrcodeScanner.start(
             { facingMode: "environment" }, 
-            {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-            },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
             (qrCodeMessage) => {
                 document.getElementById('search-engin').value = qrCodeMessage.trim();
                 fermerScannerQR();
                 renderApp();
                 alert(`🔍 Engin détecté : ${qrCodeMessage}`);
             },
-            (errorMessage) => {
-                // Ignore continue tracking errors
-            }
+            (errorMessage) => {}
         ).catch((err) => {
-            console.error("Impossible d'accéder à la caméra : ", err);
-            alert("Erreur d'accès à la caméra. Vérifiez les autorisations de votre navigateur.");
+            console.error("Erreur caméra : ", err);
+            alert("Erreur d'accès à la caméra.");
             fermerScannerQR();
         });
     }
@@ -872,26 +870,29 @@
         if (html5QrcodeScanner) {
             html5QrcodeScanner.stop().then(() => {
                 html5QrcodeScanner = null;
-            }).catch(err => console.error("Erreur à l'arrêt de la caméra", err));
+            }).catch(err => console.error("Erreur arrêt caméra", err));
         }
     }
 
-    async function ajouterOrdreSupabase(ordre) {
-        const { data, error } = await supabaseClient
-            .from('ordres_travail')
-            .insert([
-                {
-                    id: ordre.id,
-                    code_engin: ordre.code,
-                    description: ordre.description,
-                    piece_ref: ordre.piece,
-                    qte_necessaire: ordre.qteNecessaire, 
-                    etat: ordre.etat
-                }
-            ]);
+    async function stockerLocalement(ordre) {
+        ordre.synchronise = 0;
+        await localDB.ordres_travail.add(ordre);
+        alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
+    }
 
-        if (error) throw error;
-        return data;
+    async function sauvegarderOrdreTravail(ordre) {
+        if (navigator.onLine) {
+            try {
+                const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
+                if (error) throw error;
+                console.log("Synchronisé directement sur Supabase !");
+            } catch (err) {
+                console.warn("Échec en ligne, bascule local...", err);
+                await stockerLocalement(ordre);
+            }
+        } else {
+            await stockerLocalement(ordre);
+        }
     }
 
     async function ouvrirIntervention(idx) {
@@ -975,298 +976,147 @@
         }
     }
 
-    // Lancement de l'application par défaut
-    renderApp();
+    function afficherQRCodeEngin(codeEngin) {
+        const urlQR = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(codeEngin)}`;
+        
+        const modale = document.createElement('div');
+        modale.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; color:black;";
+        modale.id = "modale-qr";
+        
+        modale.innerHTML = `
+            <div style="background:white; padding:20px; border-radius:10px; text-align:center; max-width:90%;">
+                <h3 style="margin-top:0; color:black;">QR Code : ${codeEngin}</h3>
+                <img src="${urlQR}" alt="QR Code" style="margin:15px 0; border:1px solid #ccc; display:block; margin-left:auto; margin-right:auto; width:200px; height:200px;"/>
+                <p style="font-size:12px; color:#666;">À coller sur l'engin pour scan rapide</p>
+                <button onclick="window.print()" style="background:#008631; color:white; border:none; padding:10px 15px; border-radius:5px; margin-right:10px; cursor:pointer;">Imprimer</button>
+                <button onclick="document.getElementById('modale-qr').remove()" style="background:#cc0000; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Fermer</button>
+            </div>
+        `;
+        document.body.appendChild(modale);
+    }
 
-// --- FILTRE DYNAMIQUE DU MAGASIN MRO ---
-document.getElementById('recherche-magasin').addEventListener('input', function(e) {
-    const saisie = e.target.value.toLowerCase().trim();
-    const lignes = document.querySelectorAll('#stock-tbody tr');
+    function arreterAlerte() {
+        clearInterval(intervalleBip);
+        if (navigator.vibrate) navigator.vibrate(0);
+    }
 
-    lignes.forEach(ligne => {
-        const colReference = ligne.children[0] ? ligne.children[0].textContent.toLowerCase() : '';
-        const colDesignation = ligne.children[1] ? ligne.children[1].textContent.toLowerCase() : '';
+    function nettoyerEtOuvrirPDF(ot) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-        if (colReference.includes(saisie) || colDesignation.includes(saisie)) {
-            ligne.style.display = ""; 
-        } else {
-            ligne.style.display = "none"; 
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(231, 76, 60); 
+        doc.text("SNIM GMAO - INTERVENTION PRÉVENTIVE CRITIQUE", 14, 20);
+
+        doc.line(14, 25, 196, 25);
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text(`Identifiant Ordre : #OT-${ot.id || 'AUTO'}`, 14, 40);
+        doc.text(`Code Engin Concerné : ${ot.code_engin}`, 14, 50);
+        doc.text(`Type d'Intervention : ${ot.type_intervention}`, 14, 60);
+        doc.text(`Pièces Matérielles Requises : ${ot.piece_assignee || 'FIL-OIL-01 (x2)'}`, 14, 70);
+        
+        doc.setFont("helvetica", "italic");
+        doc.text("Instructions pour le Chef d'Équipe :", 14, 100);
+        doc.setFont("helvetica", "normal");
+        doc.text("- Imprimer cette fiche pour le mécanicien assigné.", 14, 110);
+        doc.text("- Sortir les pièces associées des stocks MRO.", 14, 120);
+
+        doc.output('dataurlnewwindow'); 
+    }
+
+    function declencherAlerteUrgente(ot) {
+        let repetitions = 0;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function emettreBipEtVibration() {
+            if (repetitions >= 5) {
+                arreterAlerte();
+                nettoyerEtOuvrirPDF(ot);
+                return;
+            }
+            if (navigator.vibrate) navigator.vibrate(500);
+
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+            repetitions++;
         }
-    });
-});
 
-// --- GÉNÉRATEUR DE QR CODES POUR LES ENGINS ---
-function afficherQRCodeEngin(codeEngin) {
-    const urlQR = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(codeEngin)}`;
-    
-    const modale = document.createElement('div');
-    modale.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; color:black;";
-    modale.id = "modale-qr";
-    
-    modale.innerHTML = `
-        <div style="background:white; padding:20px; border-radius:10px; text-align:center; max-width:90%;">
-            <h3 style="margin-top:0; color:black;">QR Code : ${codeEngin}</h3>
-            <img src="${urlQR}" alt="QR Code" style="margin:15px 0; border:1px solid #ccc; display:block; margin-left:auto; margin-right:auto; width:200px; height:200px;"/>
-            <p style="font-size:12px; color:#666;">À coller sur l'engin pour scan rapide</p>
-            <button onclick="window.print()" style="background:#008631; color:white; border:none; padding:10px 15px; border-radius:5px; margin-right:10px; cursor:pointer;">Imprimer</button>
-            <button onclick="document.getElementById('modale-qr').remove()" style="background:#cc0000; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Fermer</button>
-        </div>
-    `;
-    document.body.appendChild(modale);
-}
+        emettreBipEtVibration();
+        intervalleBip = setInterval(emettreBipEtVibration, 4000);
 
-// ==========================================
-// SYSTÈME DE MAINTENANCE PRÉVENTIVE AUTOMATIQUE
-// ==========================================
-let intervalleBip;
-let audioCtx = null;
-
-supabaseClient
-  .channel('table-db-changes')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ordres_travail' }, payload => {
-    const nouvelOT = payload.new;
-    if (nouvelOT.matricule === 'SYSTEM') {
-      declencherAlerteUrgente(nouvelOT);
-    }
-  })
-  .subscribe();
-
-function declencherAlerteUrgente(ot) {
-  let repetitions = 0;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  function emettreBipEtVibration() {
-    if (repetitions >= 5) {
-      arreterAlerte();
-      nettoyerEtOuvrirPDF(ot);
-      return;
+        window.addEventListener('touchstart', () => {
+            arreterAlerte();
+            nettoyerEtOuvrirPDF(ot);
+        }, { once: true });
     }
 
-    if (navigator.vibrate) {
-      navigator.vibrate(500);
-    }
+    async function synchroniserDonneesBidirectionnel() {
+        if (!navigator.onLine) return;
+        try {
+            const { data: ordresCloud, error: errCloud } = await supabaseClient.from('ordres_travail').select('*');
+            if (errCloud) throw errCloud;
 
-    let osc = audioCtx.createOscillator();
-    let gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
-
-    repetitions++;
-  }
-
-  emettreBipEtVibration();
-  intervalleBip = setInterval(emettreBipEtVibration, 4000);
-
-  window.addEventListener('touchstart', () => {
-    arreterAlerte();
-    nettoyerEtOuvrirPDF(ot);
-  }, { once: true });
-}
-
-function readme_stop_alerte() {
-  clearInterval(intervalleBip);
-  if (navigator.vibrate) navigator.vibrate(0);
-}
-
-function arreterAlerte() {
-  clearInterval(intervalleBip);
-  if (navigator.vibrate) navigator.vibrate(0);
-}
-
-function nettoyerEtOuvrirPDF(ot) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(231, 76, 60); 
-  doc.text("SNIM GMAO - INTERVENTION PRÉVENTIVE CRITIQUE", 14, 20);
-
-  doc.setDrawColor(150);
-  doc.line(14, 25, 196, 25);
-
-  doc.setFontSize(12);
-  doc.setTextColor(0);
-  doc.text(`Identifiant Ordre : #OT-${ot.id || 'AUTO'}`, 14, 40);
-  doc.text(`Code Engin Concerné : ${ot.code_engin}`, 14, 50);
-  doc.text(`Type d'Intervention : ${ot.type_intervention}`, 14, 60);
-  doc.text(`Pièces Matérielles Requises : ${ot.piece_assignee || 'FIL-OIL-01 (x2)'}`, 14, 70);
-  doc.text(`Priorité : Haute (Générée par Nécessité Système)`, 14, 80);
-
-  doc.setFont("helvetica", "italic");
-  doc.text("Instructions pour le Chef d'Équipe :", 14, 100);
-  doc.setFont("helvetica", "normal");
-  doc.text("- Imprimer cette fiche pour le mécanicien assigné.", 14, 110);
-  doc.text("- Sortir les pièces associées des stocks MRO.", 14, 120);
-  doc.text("- Clôturer l'ordre dans l'application une fois la vidange effectuée.", 14, 130);
-
-  doc.output('dataurlnewwindow'); 
-}
-
-// 🔄 2. SYNCHRONISATION BIDIRECTIONNELLE ROBUSTE (CLOUD ↔ LOCAL)
-async function synchroniserDonneesBidirectionnel() {
-    if (!navigator.onLine) {
-        console.log("Synchro impossible : l'appareil est déconnecté.");
-        return;
-    }
-
-    console.log("🔄 Lancement de la synchronisation bidirectionnelle...");
-
-    try {
-        // --- ÉTAPE A : PULL (Récupérer les mises à jour globales du Cloud) ---
-        const { data: ordresCloud, error: errCloud } = await supabaseClient
-            .from('ordres_travail')
-            .select('*');
-
-        if (errCloud) throw errCloud;
-
-        if (ordresCloud) {
-            for (let ordreC of ordresCloud) {
-                const localOrdre = await localDB.ordres_travail.get({ code_engin: ordreC.code_engin });
-
-                if (!localOrdre) {
-                    ordreC.synchronise = 1;
-                    await localDB.ordres_travail.add(ordreC);
-                } else if (localOrdre.synchronise === 0) {
-                    // CONFLIT : Règle de résolution (Le Cloud écrase la modification locale)
-                    await localDB.ordres_travail.update(localOrdre.id, {
-                        type_intervention: ordreC.type_intervention,
-                        statut: ordreC.statut,
-                        matricule: ordreC.matricule,
-                        synchronise: 1
-                    });
-                    console.log(`⚠️ Conflit résolu pour l'engin ${ordreC.code_engin} : Version Cloud prioritaire.`);
+            if (ordresCloud) {
+                for (let ordreC of ordresCloud) {
+                    const localOrdre = await localDB.ordres_travail.get({ code_engin: ordreC.code_engin });
+                    if (!localOrdre) {
+                        ordreC.synchronise = 1;
+                        await localDB.ordres_travail.add(ordreC);
+                    }
                 }
             }
-        }
+            const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
+            for (let ordreL of ordresNonSynchros) {
+                const backupId = ordreL.id;
+                delete ordreL.id; 
+                delete ordreL.synchronise;
 
-        // --- ÉTAPE B : PUSH (Envoyer les modifications locales non synchronisées) ---
-        const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
-        
-        for (let ordreL of ordresNonSynchros) {
-            const backupId = ordreL.id;
-            delete ordreL.id; 
-            delete ordreL.synchronise;
-
-            const { error: errPush } = await supabaseClient
-                .from('ordres_travail')
-                .upsert({
+                const { error: errPush } = await supabaseClient.from('ordres_travail').upsert({
                     code_engin: ordreL.code_engin,
                     type_intervention: ordreL.type_intervention,
                     statut: ordreL.statut,
                     matricule: ordreL.matricule
                 }, { onConflict: 'code_engin' });
 
-            if (!errPush) {
-                await localDB.ordres_travail.update(backupId, { synchronise: 1 });
+                if (!errPush) await localDB.ordres_travail.update(backupId, { synchronise: 1 });
             }
+            renderApp();
+        } catch (error) {
+            console.error("Échec de la synchro :", error);
         }
-
-        console.log("✅ Synchronisation bidirectionnelle terminée avec succès !");
-        renderApp();
-
-    } catch (error) {
-        console.error("Échec de la synchronisation bidirectionnelle :", error);
     }
-}
 
-async function sauvegarderOrdreTravail(ordre) {
-  if (navigator.onLine) {
-    try {
-      const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
-      if (error) throw error;
-      console.log("Synchronisé directement sur Supabase !");
-    } catch (err) {
-      console.warn("Échec de l'envoi en ligne, sauvegarde locale...", err);
-      await stockerLocalement(ordre);
-    }
-  } else {
-    await stockerLocalement(ordre);
-  }
-}
+    // Initialisation
+    renderApp();
 
-async function stockerLocalement(ordre) {
-  ordre.synchronise = 0;
-  await localDB.ordres_travail.add(ordre);
-  alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
-}
+    // Filtre dynamique du magasin MRO
+    document.getElementById('recherche-magasin').addEventListener('input', function(e) {
+        const saisie = e.target.value.toLowerCase().trim();
+        const lignes = document.querySelectorAll('#stock-tbody tr');
+        lignes.forEach(ligne => {
+            const colReference = ligne.children[0] ? ligne.children[0].textContent.toLowerCase() : '';
+            const colDesignation = ligne.children[1] ? ligne.children[1].textContent.toLowerCase() : '';
+            ligne.style.display = (colReference.includes(saisie) || colDesignation.includes(saisie)) ? "" : "none";
+        });
+    });
 
-async function cloturerInterventionSecurisee(ordreId, matriculeAgent, codePinSaisi) {
-  if (codePinSaisi !== "1234") {
-    alert("Erreur : Code PIN invalide. Clôture de l'ordre annulée.");
-    return;
-  }
-
-  const historiqueLog = {
-    ordre_id: ordreId,
-    action: "CLOTURE_ORDRE",
-    execute_par: matriculeAgent,
-    horodatage: new Date().toISOString(),
-    ip_appareil: "Mobile_Terrain"
-  };
-
-  const { error: errorOT } = await supabaseClient
-    .from('ordres_travail')
-    .update({ statut: 'CLOTURE' })
-    .eq('id', ordreId);
-
-  const { error: errorLog } = await supabaseClient
-    .from('historique_actions') 
-    .insert([historiqueLog]);
-
-  if (!errorOT && !errorLog) {
-    alert(`Ordre #${ordreId} clôturé de manière sécurisée par ${matriculeAgent}. Signé numériquement.`);
-  }
-}
-
-async function verifierEtReserverStock(codePiece, quantiteRequise) {
-  const { data: piece, error } = await supabaseClient
-    .from('stocks_mro')
-    .select('quantite_disponible, designation')
-    .eq('code_piece', codePiece)
-    .single();
-
-  if (error || !piece) {
-    console.error("Pièce introuvable dans le catalogue des stocks.");
-    return false;
-  }
-
-  if (piece.quantite_disponible < quantiteRequise) {
-    alert(`Alerte Rupture Stock : Impossible de lancer l'intervention. Il ne reste que ${piece.quantite_disponible} unité(s) de ${piece.designation}.`);
-    return false;
-  }
-
-  const nouvelleQuantite = piece.quantite_disponible - quantiteRequise;
-  await supabaseClient
-    .from('stocks_mro')
-    .update({ quantite_disponible: nouvelleQuantite })
-    .eq('code_piece', codePiece);
-
-  console.log(`Réservation réussie : ${quantiteRequise} x ${piece.designation} retirés du stock.`);
-  return true;
-}
-
-function appliquerPermissionsInterface(roleUtilisateur) {
-  const zoneAjoutEngin = document.getElementById("floating-add-btn"); 
-  const zoneDensesFinancieres = document.getElementById("kpi-budget");
-
-  switch(roleUtilisateur) {
-    case 'MECANICIEN':
-      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
-      break;
-    case 'CHEF_ATELIER':
-      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
-      break;
-    case 'DIRECTEUR':
-      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "flex";
-      break;
-  }
-}
+    // Supabase Channel Subscription
+    supabaseClient
+      .channel('table-db-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ordres_travail' }, payload => {
+        const nouvelOT = payload.new;
+        if (nouvelOT.matricule === 'SYSTEM') declencherAlerteUrgente(nouvelOT);
+      })
+      .subscribe();
 </script>
 </body>
 </html>
