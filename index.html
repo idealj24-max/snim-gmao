@@ -212,7 +212,7 @@
             grid-template-columns: 1fr;
         }
 
-        .stat-card {
+        .stats-card {
             background: rgba(255, 255, 255, 0.98);
             padding: 12px 10px;
             border-radius: 10px;
@@ -392,6 +392,7 @@
 
         .action-btns {
             display: flex;
+            align-items: center;
             gap: 4px;
         }
 
@@ -408,6 +409,7 @@
         .btn-sm-maint { background: #F59E0B; }
         .btn-sm-clear { background: #10B981; }
         .btn-sm-del { background: #EF4444; }
+        .btn-sm-qr { background: #1E3A8A; }
 
         .floating-btn {
             position: fixed;
@@ -441,9 +443,8 @@
         footer strong { color: #38BDF8; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 </head>
 <body>
 
@@ -559,6 +560,11 @@
     <div id="tab-stock" class="tab-content">
         <div class="card">
             <h2>Magasin des Pièces Détachées</h2>
+            <!-- Barre de recherche dynamique pour les stocks -->
+            <div style="padding: 10px 0;">
+                <input type="text" id="recherche-magasin" placeholder="🔍 Rechercher une référence ou pièce..." 
+                       style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; box-sizing: border-box; background-color: #ffffff; color: #000000;">
+            </div>
             <div class="table-container">
                 <table>
                     <thead>
@@ -717,13 +723,14 @@
                 let badgeClass = e.statut === "Opérationnel" ? "badge-ok" : (e.statut === "Maintenance" ? "badge-maint" : "badge-crit");
                 let tr = document.createElement('tr');
                 
-                let actionsHtml = `<td>-</td>`;
+                let actionsHtml = `<td><button class="btn-sm btn-sm-qr" onclick="afficherQRCodeEngin('${e.code}')">📸 QR</button></td>`;
                 if (canModify) {
                     actionsHtml = `
                         <td>
                             <div class="action-btns">
                                 ${e.statut !== 'Opérationnel' ? `<button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>` : `<button class="btn-sm btn-sm-maint" onclick="ouvrirIntervention(${idx})">Panne</button>`}
                                 <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">X</button>
+                                <button class="btn-sm btn-sm-qr" onclick="afficherQRCodeEngin('${e.code}')">📸 QR</button>
                             </div>
                         </td>
                     `;
@@ -790,7 +797,6 @@
 
         if (navigator.onLine) {
             try {
-                // Synchronisation groupée des engins vers Supabase
                 for (let engin of db.engins) {
                     await supabaseClient.from('engins').upsert({
                         code: engin.code,
@@ -819,7 +825,6 @@
     }
 
     async function ajouterOrdreSupabase(ordre) {
-        // Adaptation des clés JS aux colonnes SQL (snake_case)
         const { data, error } = await supabaseClient
             .from('ordres_travail')
             .insert([
@@ -922,26 +927,60 @@
 
     // Lancement de l'application par défaut
     renderApp();
+
+// --- FILTRE DYNAMIQUE DU MAGASIN MRO ---
+document.getElementById('recherche-magasin').addEventListener('input', function(e) {
+    const saisie = e.target.value.toLowerCase().trim();
+    const lignes = document.querySelectorAll('#stock-tbody tr');
+
+    lignes.forEach(ligne => {
+        const colReference = ligne.children[0] ? ligne.children[0].textContent.toLowerCase() : '';
+        const colDesignation = ligne.children[1] ? ligne.children[1].textContent.toLowerCase() : '';
+
+        if (colReference.includes(saisie) || colDesignation.includes(saisie)) {
+            ligne.style.display = ""; 
+        } else {
+            ligne.style.display = "none"; 
+        }
+    });
+});
+
+// --- GÉNÉRATEUR DE QR CODES POUR LES ENGINS ---
+function afficherQRCodeEngin(codeEngin) {
+    const urlQR = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(codeEngin)}`;
+    
+    const modale = document.createElement('div');
+    modale.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; color:black;";
+    modale.id = "modale-qr";
+    
+    modale.innerHTML = `
+        <div style="background:white; padding:20px; border-radius:10px; text-align:center; max-width:90%;">
+            <h3 style="margin-top:0; color:black;">QR Code : ${codeEngin}</h3>
+            <img src="${urlQR}" alt="QR Code" style="margin:15px 0; border:1px solid #ccc; display:block; margin-left:auto; margin-right:auto; width:200px; height:200px;"/>
+            <p style="font-size:12px; color:#666;">À coller sur l'engin pour scan rapide</p>
+            <button onclick="window.print()" style="background:#008631; color:white; border:none; padding:10px 15px; border-radius:5px; margin-right:10px; cursor:pointer;">Imprimer</button>
+            <button onclick="document.getElementById('modale-qr').remove()" style="background:#cc0000; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Fermer</button>
+        </div>
+    `;
+    document.body.appendChild(modale);
+}
+
 // ==========================================
 // SYSTÈME DE MAINTENANCE PRÉVENTIVE AUTOMATIQUE
 // ==========================================
 let intervalleBip;
 let audioCtx = null;
 
-// 1. Écouter en temps réel l'insertion d'ordres générés par le SYSTEM
-supabase
+supabaseClient
   .channel('table-db-changes')
   .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ordres_travail' }, payload => {
     const nouvelOT = payload.new;
-    
-    // Si l'ordre vient du système automatique
     if (nouvelOT.matricule === 'SYSTEM') {
       declencherAlerteUrgente(nouvelOT);
     }
   })
   .subscribe();
 
-// 2. Gestion des bips et vibrations (5 répétitions espacées de 4s, arrêt au toucher)
 function declencherAlerteUrgente(ot) {
   let repetitions = 0;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -953,12 +992,10 @@ function declencherAlerteUrgente(ot) {
       return;
     }
 
-    // Vibration du téléphone
     if (navigator.vibrate) {
-      navigator.vibrate(500); // 500ms de vibration
+      navigator.vibrate(500);
     }
 
-    // Bip sonore industriel
     let osc = audioCtx.createOscillator();
     let gain = audioCtx.createGain();
     osc.type = 'sine';
@@ -967,16 +1004,14 @@ function declencherAlerteUrgente(ot) {
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.3); // Durée du bip : 300ms
+    osc.stop(audioCtx.currentTime + 0.3);
 
     repetitions++;
   }
 
-  // Lancement du cycle
   emettreBipEtVibration();
   intervalleBip = setInterval(emettreBipEtVibration, 4000);
 
-  // Arrêt immédiat dès que l'agent touche l'écran
   window.addEventListener('touchstart', () => {
     arreterAlerte();
     nettoyerEtOuvrirPDF(ot);
@@ -993,12 +1028,10 @@ function arreterAlerte() {
   if (navigator.vibrate) navigator.vibrate(0);
 }
 
-// 3. Génération instantanée et ouverture du PDF d'intervention
 function nettoyerEtOuvrirPDF(ot) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  // En-tête industriel rouge alerte
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(231, 76, 60); 
@@ -1007,7 +1040,6 @@ function nettoyerEtOuvrirPDF(ot) {
   doc.setDrawColor(150);
   doc.line(14, 25, 196, 25);
 
-  // Contenu technique
   doc.setFontSize(12);
   doc.setTextColor(0);
   doc.text(`Identifiant Ordre : #OT-${ot.id || 'AUTO'}`, 14, 40);
@@ -1016,7 +1048,6 @@ function nettoyerEtOuvrirPDF(ot) {
   doc.text(`Pièces Matérielles Requises : ${ot.piece_assignee || 'FIL-OIL-01 (x2)'}`, 14, 70);
   doc.text(`Priorité : Haute (Générée par Nécessité Système)`, 14, 80);
 
-  // Consignes terrain
   doc.setFont("helvetica", "italic");
   doc.text("Instructions pour le Chef d'Équipe :", 14, 100);
   doc.setFont("helvetica", "normal");
@@ -1024,21 +1055,18 @@ function nettoyerEtOuvrirPDF(ot) {
   doc.text("- Sortir les pièces associées des stocks MRO.", 14, 120);
   doc.text("- Clôturer l'ordre dans l'application une fois la vidange effectuée.", 14, 130);
 
-  // Ouvre le PDF sur le téléphone
   doc.output('dataurlnewwindow'); 
 }
-// Initier la base de données locale (IndexedDB)
+
 const localDB = new Dexie("GMAO_Local_DB");
 localDB.version(1).stores({
   ordres_travail: '++id, code_engin, type_intervention, statut, matricule, synchronise'
 });
 
-// Fonction pour sauvegarder un ordre (gère le online et offline)
 async function sauvegarderOrdreTravail(ordre) {
   if (navigator.onLine) {
     try {
-      // En ligne : Envoi direct à Supabase
-      const { data, error } = await supabase.from('ordres_travail').insert([ordre]);
+      const { data, error } = await supabaseClient.from('ordres_travail').insert([ordre]);
       if (error) throw error;
       console.log("Synchronisé directement sur Supabase !");
     } catch (err) {
@@ -1046,38 +1074,34 @@ async function sauvegarderOrdreTravail(ordre) {
       await stockerLocalement(ordre);
     }
   } else {
-    // Hors-ligne : Stockage local avec drapeau 'synchronise: 0'
     await stockerLocalement(ordre);
   }
 }
 
 async function stockerLocalement(ordre) {
-  ordre.synchronise = 0; // Non synchronisé
+  ordre.synchronise = 0;
   await localDB.ordres_travail.add(ordre);
   alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
 }
 
-// Écouter le retour du réseau pour synchroniser automatiquement
 window.addEventListener('online', async () => {
   console.log("Réseau détecté ! Synchronisation des données en cours...");
   const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
   
   for (let ordre of ordresNonSynchros) {
-    delete ordre.id; // Laisser Supabase générer son propre ID
+    delete ordre.id; 
     delete ordre.synchronise;
     
-    const { error } = await supabase.from('ordres_travail').insert([ordre]);
+    const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
     if (!error) {
-      // Si la synchronisation réussit, on met à jour le statut local
       await localDB.ordres_travail.where('code_engin').equals(ordre.code_engin).modify({ synchronise: 1 });
     }
   }
   alert("Toutes les données hors-ligne ont été synchronisées avec succès sur Supabase Cloud !");
 });
-// Fonction de validation sécurisée pour la clôture d'une tâche
+
 async function cloturerInterventionSecurisee(ordreId, matriculeAgent, codePinSaisi) {
-  // 1. Vérification fictive ou réelle du PIN de l'agent
-  if (codePinSaisi !== "1234") { // Remplace par une vérification en DB à terme
+  if (codePinSaisi !== "1234") {
     alert("Erreur : Code PIN invalide. Clôture de l'ordre annulée.");
     return;
   }
@@ -1090,24 +1114,22 @@ async function cloturerInterventionSecurisee(ordreId, matriculeAgent, codePinSai
     ip_appareil: "Mobile_Terrain"
   };
 
-  // 2. Mettre à jour le statut de l'ordre
-  const { error: errorOT } = await supabase
+  const { error: errorOT } = await supabaseClient
     .from('ordres_travail')
     .update({ statut: 'CLOTURE' })
     .eq('id', ordreId);
 
-  // 3. Écrire dans la table d'audit historique (Audit Trail)
-  const { error: errorLog } = await supabase
-    .from('historique_actions') // Tu devras créer cette table simple sur Supabase
+  const { error: errorLog } = await supabaseClient
+    .from('historique_actions') 
     .insert([historiqueLog]);
 
   if (!errorOT && !errorLog) {
     alert(`Ordre #${ordreId} clôturé de manière sécurisée par ${matriculeAgent}. Signé numériquement.`);
   }
 }
+
 async function verifierEtReserverStock(codePiece, quantiteRequise) {
-  // 1. Récupérer l'état du stock sur Supabase
-  const { data: piece, error } = await supabase
+  const { data: piece, error } = await supabaseClient
     .from('stocks_mro')
     .select('quantite_disponible, designation')
     .eq('code_piece', codePiece)
@@ -1118,15 +1140,13 @@ async function verifierEtReserverStock(codePiece, quantiteRequise) {
     return false;
   }
 
-  // 2. Vérifier si le stock est suffisant
   if (piece.quantite_disponible < quantiteRequise) {
     alert(`Alerte Rupture Stock : Impossible de lancer l'intervention. Il ne reste que ${piece.quantite_disponible} unité(s) de ${piece.designation}.`);
     return false;
   }
 
-  // 3. Déduire automatiquement la pièce du stock (Réservation)
   const nouvelleQuantite = piece.quantite_disponible - quantiteRequise;
-  await supabase
+  await supabaseClient
     .from('stocks_mro')
     .update({ quantite_disponible: nouvelleQuantite })
     .eq('code_piece', codePiece);
@@ -1134,32 +1154,23 @@ async function verifierEtReserverStock(codePiece, quantiteRequise) {
   console.log(`Réservation réussie : ${quantiteRequise} x ${piece.designation} retirés du stock.`);
   return true;
 }
+
 function appliquerPermissionsInterface(roleUtilisateur) {
-  const zoneAjoutEngin = document.getElementById("bouton-ajouter-engin"); // Ajuste selon tes IDs réels
-  const zoneDensesFinancieres = document.getElementById("zone-depenses-mro");
-  const formulaireOrdre = document.getElementById("formulaire-ot");
+  const zoneAjoutEngin = document.getElementById("floating-add-btn"); 
+  const zoneDensesFinancieres = document.getElementById("kpi-budget");
 
   switch(roleUtilisateur) {
     case 'MECANICIEN':
-      // Le mécanicien peut seulement voir et exécuter ses ordres de travail
       if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
-      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "none";
       break;
-      
     case 'CHEF_ATELIER':
-      // Le chef d'atelier gère les ordres et les pièces, mais ne modifie pas la structure du parc
       if(zoneAjoutEngin) zoneAjoutEngin.style.display = "none";
-      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "block";
       break;
-      
     case 'DIRECTEUR':
-      // Le directeur a accès au contrôle total (vue financière globale, gestion complète)
-      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "block";
-      if(zoneDensesFinancieres) zoneDensesFinancieres.style.display = "block";
+      if(zoneAjoutEngin) zoneAjoutEngin.style.display = "flex";
       break;
   }
 }
-
 </script>
 </body>
 </html>
