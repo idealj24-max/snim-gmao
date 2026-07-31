@@ -33,7 +33,6 @@
             z-index: -1;
         }
 
-        /* 🔐 ÉCRAN DE CONNEXION MODERNE */
         #auth-overlay {
             position: fixed;
             top: 0;
@@ -101,7 +100,6 @@
             background: white;
         }
 
-        /* HEADER & BARRE DE STATUT HORS-LIGNE */
         header {
             background: rgba(18, 35, 60, 0.98);
             color: white;
@@ -162,7 +160,6 @@
         .online { background: #D1FAE5; color: #065F46; }
         .offline { background: #FEF3C7; color: #92400E; }
 
-        /* NAVIGATION TACTILE REVISITÉE POUR ÉVITER LES BUGS D'ÉCRAN */
         .nav-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -174,13 +171,13 @@
         }
 
         .tab-btn {
-            flex: 1 1 25%;
-            min-width: 80px;
+            flex: 1 1 20%;
+            min-width: 70px;
             background: none;
             border: none;
             color: #94A3B8;
-            padding: 10px 4px;
-            font-size: 0.75rem;
+            padding: 12px 4px;
+            font-size: 0.72rem;
             font-weight: 700;
             border-radius: 6px;
             cursor: pointer;
@@ -188,6 +185,7 @@
             text-transform: uppercase;
             white-space: nowrap;
             text-align: center;
+            min-height: 48px; /* Optimisation tactile globale */
         }
 
         .tab-btn.active {
@@ -268,7 +266,6 @@
             align-items: center;
         }
 
-        /* RADAR MAP MULTI-BLIPS INDUSTRIAL */
         .radar-container {
             position: relative;
             width: 100%;
@@ -343,6 +340,7 @@
             border-radius: 6px;
             font-size: 0.85rem;
             outline: none;
+            min-height: 48px;
         }
 
         .btn-action {
@@ -354,6 +352,7 @@
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
+            min-height: 48px; /* Zone tactile minimale 48px */
         }
 
         .btn-iot { background: #10B981; }
@@ -409,6 +408,7 @@
             font-size: 0.7rem;
             cursor: pointer;
             color: white;
+            min-height: 48px; /* Zone tactile confortable pour les gants */
         }
 
         .btn-sm-maint { background: #F59E0B; }
@@ -417,6 +417,7 @@
         .btn-sm-qr { background: #1E3A8A; }
         .btn-sm-check { background: #8B5CF6; }
 
+        /* FAB OPTIMISÉ POUR OUVRIR L'APPAREIL PHOTO INSTANTANÉMENT */
         .floating-btn {
             position: fixed;
             bottom: 20px;
@@ -424,10 +425,9 @@
             background: #0091DA;
             color: white;
             border: none;
-            width: 54px;
-            height: 54px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            font-size: 1.6rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
@@ -435,6 +435,75 @@
             z-index: 999;
             cursor: pointer;
             border: 2px solid white;
+        }
+        .floating-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+        }
+
+        /* Styles Spécifiques Usines Guelb & Voies */
+        .guelb-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        @media(max-width: 600px) { .guelb-grid { grid-template-columns: 1fr; } }
+        .factory-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .factory-title {
+            font-weight: bold;
+            color: #1C2541;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .telemetry-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0091DA;
+        }
+        .railway-line {
+            position: relative;
+            height: 8px;
+            background: #CBD5E1;
+            border-radius: 4px;
+            margin: 40px 0 20px 0;
+        }
+        .railway-marker {
+            position: absolute;
+            top: -30px;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .railway-marker::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #64748B;
+        }
+        .railway-marker.alert::after {
+            background: #EF4444;
+            animation: pulse 1.5s infinite;
+        }
+        .railway-marker.work::after {
+            background: #F59E0B;
+        }
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.5); opacity: 0.5; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
         }
 
         footer {
@@ -450,12 +519,10 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
 
-<!-- 🔐 FENÊTRE DE CONNEXION -->
 <div id="auth-overlay">
     <div class="auth-card">
         <svg class="snim-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:50px; height:50px; margin-bottom:10px;">
@@ -469,15 +536,9 @@
         <p>Entrez votre matricule professionnel pour vous authentifier</p>
         <div class="form-group">
             <label>Matricule Agent</label>
-            <input type="text" id="matricule-input" class="form-control" placeholder="ex: M-104 (Mécanicien) ou C-01 (Chef) ou D-99 (Directeur)" value="C-01">
+            <input type="text" id="matricule-input" class="form-control" placeholder="ex: C-01" value="C-01">
         </div>
         <button class="btn-action" style="width:100%; padding:12px; background:#0091DA; font-weight:bold;" onclick="connecterUtilisateur()">Se Connecter</button>
-        <div style="margin-top:15px; font-size:0.65rem; color:#94A3B8; text-align:left; background:#F1F5F9; padding:8px; border-radius:6px;">
-            <strong>Profils de test :</strong><br>
-            • <code>M-104</code> : Mécanicien (Déclaration pannes)<br>
-            • <code>C-01</code> : Chef d'Atelier (Validation OT & Statuts)<br>
-            • <code>D-99</code> : Directeur / Admin (Accès complet & Budgets)
-        </div>
     </div>
 </div>
 
@@ -504,6 +565,7 @@
 
 <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('parc')">Radar Flotte</button>
+    <button class="tab-btn" onclick="switchTab('guelb')">Guelb & Voies</button>
     <button class="tab-btn" onclick="switchTab('stock')">Stocks MRO</button>
     <button class="tab-btn" onclick="switchTab('ot')">Ordres Travail</button>
 </div>
@@ -532,19 +594,15 @@
             <h2>Suivi Cartographique Satellitaire (Live)</h2>
             <div class="radar-container" id="radar-screen">
                 <div class="radar-grid"></div>
-                <div class="radar-ring" style="width: 80px; height: 80px;"></div>
-                <div class="radar-ring" style="width: 160px; height: 160px;"></div>
-                <div class="radar-ring" style="width: 220px; height: 220px;"></div>
             </div>
         </div>
 
         <div class="card">
             <h2>Suivi du Matériel et Télémétrie 
-                <button class="btn-sm btn-sm-clear btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT GPS</button>
+                <button class="btn-action btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT GPS</button>
             </h2>
-            <div class="tool-bar">
+            <div class="tool-bar" style="margin-top: 10px;">
                 <input type="text" id="search-engin" class="search-input" placeholder="🔍 Scanner QR ou taper code..." oninput="renderApp()">
-                <button class="btn-action" onclick="simulerScanQR()">📷 Scan QR</button>
             </div>
             <div class="table-container">
                 <table>
@@ -563,23 +621,51 @@
         </div>
     </div>
 
+    <!-- NOUVEAU : ENGINS ET COMPOSANTS SPÉCIFIQUES (GUELB & VOIES) -->
+    <div id="tab-guelb" class="tab-content">
+        <div class="card">
+            <h2>Usines d'Enrichissement Guelb I & II (Télémétrie)</h2>
+            <div class="guelb-grid">
+                <div class="factory-card">
+                    <div class="factory-title">🏭 Complexe GUELB I</div>
+                    <p>Température broyeur : <span id="guelb1-temp" class="telemetry-val">74.2 °C</span></p>
+                    <p>Vibrations paliers : <span id="guelb1-vib" class="telemetry-val">4.2 mm/s</span></p>
+                </div>
+                <div class="factory-card">
+                    <div class="factory-title">🏭 Complexe GUELB II</div>
+                    <p>Température broyeur : <span id="guelb2-temp" class="telemetry-val">81.5 °C</span></p>
+                    <p>Vibrations paliers : <span id="guelb2-vib" class="telemetry-val">5.8 mm/s</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Ligne de Chemin de Fer Minéralière (Nouadhibou - Zouerate)</h2>
+            <p style="font-size: 0.8rem; color: #64748B;">État linéaire en temps réel du corridor ferroviaire SNIM :</p>
+            <div class="railway-line">
+                <div class="railway-marker" style="left: 10%;">PK 0<br><span style="color:#64748B">Nouadhibou</span></div>
+                <div class="railway-marker work" style="left: 50%;">PK 320<br><span style="color:#F59E0B">⚠️ Chantier Voie</span></div>
+                <div class="railway-marker alert" style="left: 70%;">PK 412<br><span style="color:#EF4444">🚨 Ensablement</span></div>
+                <div class="railway-marker" style="left: 95%;">PK 650<br><span style="color:#64748B">Zouerate</span></div>
+            </div>
+        </div>
+    </div>
+
     <!-- STOCKS MRO -->
     <div id="tab-stock" class="tab-content">
         <div class="card">
             <h2>Magasin des Pièces Détachées</h2>
             <div style="padding: 10px 0;">
-                <input type="text" id="recherche-magasin" placeholder="🔍 Rechercher une référence ou pièce..." 
-                       style="width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; box-sizing: border-box; background-color: #ffffff; color: #000000;">
+                <input type="text" id="recherche-magasin" placeholder="🔍 Rechercher une référence ou pièce..." class="search-input" style="width: 100%;">
             </div>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Référence</th>
-                            <th>Désignation de la pièce</th>
+                            <th>Désignation</th>
                             <th>Stock Restant</th>
                             <th>Prix Unitaire</th>
-                            <th>Alerte Ravitaillement</th>
+                            <th>Statut</th>
                         </tr>
                     </thead>
                     <tbody id="stock-tbody"></tbody>
@@ -610,16 +696,18 @@
     </div>
 </main>
 
-<!-- 📷 MODALE SCANNER CAMERA -->
 <div id="qr-reader-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; text-align: center;">
         <h3 style="color: #1C2541; margin-bottom: 15px;">Scanner le Code Engin</h3>
         <div id="reader" style="width: 100%; background: #000; border-radius: 8px; overflow: hidden;"></div>
-        <button class="btn-action" style="background: #EF4444; width: 100%; margin-top: 15px; padding: 12px; font-weight: bold;" onclick="fermerScannerQR()">Annuler / Fermer</button>
+        <button class="btn-action" style="background: #EF4444; width: 100%; margin-top: 15px;" onclick="fermerScannerQR()">Annuler / Fermer</button>
     </div>
 </div>
 
-<button id="floating-add-btn" class="floating-btn" onclick="ajouterNouvelEngin()" style="display:none;">+</button>
+<!-- LE FAB CRÉE DÉSORMAIS UN ACCÈS DIRECT AU SCANNER CAMERA (OPTIMISATION TACTILE GANTS) -->
+<button id="floating-scan-btn" class="floating-btn" onclick="simulerScanQR()">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6V2H4c-1.1 0-2 .9-2 2v6h2V4zm16-2h-6v2h6v6h2V4c0-1.1-.9-2-2-2zM4 20h6v2H4c-1.1 0-2-.9-2-2v-6h2v6zm16 2h-6v-2h6v-6h2v6c0 1.1-.9 2-2 2zM7 7h10v10H7V7z"/></svg>
+</button>
 
 <footer>
     Plateforme Industrielle SNIM GMAO Enterprise &copy; 2026 | Mode Hybride Cloud & Hors-Ligne
@@ -632,38 +720,26 @@
 
     let currentUser = null;
     let html5QrcodeScanner = null;
-    let intervalleBip;
-    let audioCtx = null;
 
-    let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v4')) || {
+    // Base de données unifiée locale synchronisée (Hybride localStorage local)
+    let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v5')) || {
         engins: [
-            { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40, circuitHydraulique: { fuite: false, pressionOk: true, niveauHuile: 100 } },
-            { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance", x: 70, y: 30, circuitHydraulique: { fuite: false, pressionOk: true, niveauHuile: 100 } },
-            { code: "BULL-005", modele: "Bulldozer Liebherr PR776", heures: 5120, statut: "Critique", x: 50, y: 75, circuitHydraulique: { fuite: true, pressionOk: false, niveauHuile: 35 } },
-            { code: "TR-09", modele: "Tombereau Lourd Snim-09", heures: 7230, statut: "Opérationnel", x: 35, y: 60, circuitHydraulique: { fuite: false, pressionOk: true, niveauHuile: 95 } },
-            { code: "GROVE-02", modele: "Grue Mobile Grove GMK", heures: 3120, statut: "Opérationnel", x: 80, y: 65, circuitHydraulique: { fuite: false, pressionOk: true, niveauHuile: 98 } }
+            { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40 },
+            { code: "TOMB-088", modele: "Tombereau Rigide Komatsu HD785", heures: 9200, statut: "Maintenance", x: 70, y: 30 },
+            { code: "BULL-005", modele: "Bulldozer Liebherr PR776", heures: 5120, statut: "Critique", x: 50, y: 75 }
         ],
         stocks: [
             { ref: "FIL-OIL-01", nom: "Filtre à huile gros moteur", qte: 14, prix: 4500 },
-            { ref: "HYD-FLUID-A", nom: "Fluide hydraulique Haute Pression (L)", qte: 350, prix: 120 },
-            { ref: "JNT-CUL-K", nom: "Kit joint de culasse renforcé", qte: 3, prix: 12500 }
+            { ref: "HYD-FLUID-A", nom: "Fluide hydraulique HP (L)", qte: 350, prix: 120 }
         ],
         ordres: [
-            { id: 101, code: "TOMB-088", description: "Remplacement préventif des filtres", piece: "FIL-OIL-01", qteNecessaire: 2, etat: "En Cours" },
-            { id: 102, code: "BULL-005", description: "Fuite majeure circuit hydraulique", piece: "HYD-FLUID-A", qteNecessaire: 50, etat: "En Cours" }
+            { id: 101, code: "TOMB-088", description: "Remplacement préventif filtres", piece: "FIL-OIL-01", qteNecessaire: 2, etat: "En Cours" }
         ],
-        coutTotalMRO: 15100
+        coutTotalMRO: 15100,
+        offlineQueue: [] // File d'attente réelle pour la synchronisation Supabase
     };
 
-    const localDB = new Dexie("GMAO_Local_DB");
-    localDB.version(1).stores({
-      ordres_travail: '++id, code_engin, type_intervention, statut, matricule, synchronise'
-    });
-
-    window.addEventListener('online', () => {
-        mettreAJourStatutReseau();
-        synchroniserDonneesBidirectionnel();
-    });
+    window.addEventListener('online', () => { mettreAJourStatutReseau(); synchroniserDonneesOffline(); });
     window.addEventListener('offline', mettreAJourStatutReseau);
 
     function mettreAJourStatutReseau() {
@@ -673,45 +749,26 @@
             badge.innerText = "🟢 En Ligne";
         } else {
             badge.className = "offline-status offline";
-            badge.innerText = "⚡ Mode Hors-Ligne";
-        }
-    }
-
-    function appliquerPermissionsInterface(roleUtilisateur) {
-        const zoneAjoutEngin = document.getElementById("floating-add-btn"); 
-        if (!zoneAjoutEngin) return;
-        
-        if (roleUtilisateur === "Directeur / Admin" || roleUtilisateur === "Chef d'Atelier" || roleUtilisateur === "DIRECTEUR") {
-            zoneAjoutEngin.style.display = "flex";
-        } else {
-            zoneAjoutEngin.style.display = "none";
+            badge.innerText = "⚡ Désert (Hors-Ligne)";
         }
     }
 
     function connecterUtilisateur() {
         let matricule = document.getElementById('matricule-input').value.trim().toUpperCase();
-        if (!matricule) { alert("Veuillez entrer un matricule valide."); return; }
-
-        let role = "Mécanicien";
-        let prefix = matricule.charAt(0);
-        if (prefix === 'C') role = "Chef d'Atelier";
-        if (prefix === 'D') role = "Directeur / Admin";
-
-        currentUser = { matricule, role };
-        document.getElementById('user-display-role').innerText = `${matricule} (${role})`;
+        if (!matricule) return;
+        currentUser = { matricule, role: matricule.startsWith('C') ? "Chef d'Atelier" : "Mécanicien" };
+        document.getElementById('user-display-role').innerText = `${matricule}`;
         document.getElementById('auth-overlay').style.display = 'none';
-
-        appliquerPermissionsInterface(role);
         renderApp();
+        initGuelbTelemetry();
     }
 
     function deconnecter() {
-        currentUser = null;
         document.getElementById('auth-overlay').style.display = 'flex';
     }
 
     function save() {
-        localStorage.setItem('snim_gmao_enterprise_v4', JSON.stringify(db));
+        localStorage.setItem('snim_gmao_enterprise_v5', JSON.stringify(db));
         renderApp();
     }
 
@@ -730,70 +787,34 @@
         parcBody.innerHTML = '';
         
         let filter = document.getElementById('search-engin').value.toLowerCase();
-        let totalEngins = db.engins.length;
-        let dispoEngins = 0;
-        let alertesCritiques = 0;
-
-        let canModify = currentUser && (currentUser.role === "Chef d'Atelier" || currentUser.role === "Directeur / Admin");
+        let totalEngins = db.engins.length, dispoEngins = 0, alertesCritiques = 0;
 
         db.engins.forEach((e, idx) => {
-            // S'assurer de la présence des structures d'analyse hydraulique 
-            if (!e.circuitHydraulique) {
-                e.circuitHydraulique = { fuite: false, pressionOk: true, niveauHuile: 100 };
-            }
-
             if (e.statut === "Opérationnel") dispoEngins++;
             if (e.statut === "Critique") alertesCritiques++;
 
             let blip = document.createElement('div');
-            let isRunningClass = e.statut === "Opérationnel" ? "blip-running" : "blip-stopped";
-            blip.className = `radar-blip ${isRunningClass}`;
-            blip.style.left = `${e.x}%`;
-            blip.style.top = `${e.y}%`;
+            blip.className = `radar-blip ${e.statut === "Opérationnel" ? "blip-running" : "blip-stopped"}`;
+            blip.style.left = `${e.x}%`; blip.style.top = `${e.y}%`;
             blip.innerHTML = `<span class="blip-label">${e.code}</span>`;
-            
-            blip.onclick = () => {
-                document.getElementById('search-engin').value = e.code;
-                renderApp();
-            };
             radarScreen.appendChild(blip);
 
             if (e.code.toLowerCase().includes(filter) || e.modele.toLowerCase().includes(filter)) {
-                let badgeClass = e.statut === "Opérationnel" ? "badge-ok" : (e.statut === "Maintenance" ? "badge-maint" : "badge-crit");
                 let tr = document.createElement('tr');
-                
-                let actionsHtml = `
-                    <td>
-                        <div class="action-btns">
-                            <button class="btn-sm btn-sm-check" onclick="diagnostiquerHydraulique(${idx})">🩺 Hydro</button>
-                            <button class="btn-sm btn-sm-qr" onclick="afficherQRCodeEngin('${e.code}')">📸 QR</button>
-                        </div>
-                    </td>`;
-                if (canModify) {
-                    actionsHtml = `
-                        <td>
-                            <div class="action-btns">
-                                ${e.statut !== 'Opérationnel' ? `<button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>` : `<button class="btn-sm btn-sm-maint" onclick="ouvrirIntervention(${idx})">Panne</button>`}
-                                <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">X</button>
-                                <button class="btn-sm btn-sm-check" onclick="diagnostiquerHydraulique(${idx})">🩺 Hydro</button>
-                                <button class="btn-sm btn-sm-qr" onclick="afficherQRCodeEngin('${e.code}')">📸 QR</button>
-                            </div>
-                        </td>
-                    `;
-                }
-
                 tr.innerHTML = `
-                    <td style="font-weight:700; color:#1C2541;">📍 ${e.code}</td>
-                    <td>${e.modele} ${e.circuitHydraulique.fuite ? '⚠️ 💧' : ''}</td>
-                    <td style="font-weight:700;">${e.heures} h</td>
-                    <td><span class="badge ${badgeClass}">${e.statut}</span></td>
-                    ${actionsHtml}
+                    <td style="font-weight:700;">📍 ${e.code}</td>
+                    <td>${e.modele}</td>
+                    <td>${e.heures} h</td>
+                    <td><span class="badge ${e.statut === 'Opérationnel' ? 'badge-ok' : 'badge-crit'}">${e.statut}</span></td>
+                    <td>
+                        <button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Clôturer / Dispo</button>
+                    </td>
                 `;
                 parcBody.appendChild(tr);
             }
         });
 
-        document.getElementById('kpi-dispo').innerText = totalEngins ? Math.round((dispoEngins / totalEngins) * 100) + "%" : "100%";
+        document.getElementById('kpi-dispo').innerText = Math.round((dispoEngins / totalEngins) * 100) + "%";
         document.getElementById('kpi-alertes').innerText = alertesCritiques;
         document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
 
@@ -801,195 +822,51 @@
         const stockBody = document.getElementById('stock-tbody');
         stockBody.innerHTML = '';
         db.stocks.forEach(s => {
-            let tr = document.createElement('tr');
-            let alerteStock = s.qte <= 5 ? `<span class="badge badge-crit">🔥 Bas</span>` : `<span class="badge badge-ok">OK</span>`;
-            tr.innerHTML = `
-                <td style="font-weight:700;">${s.ref}</td>
-                <td>${s.nom}</td>
-                <td style="font-weight:700; color:#0091DA;">${s.qte}</td>
-                <td>${s.prix} UM</td>
-                <td>${alerteStock}</td>
-            `;
-            stockBody.appendChild(tr);
+            stockBody.innerHTML += `<tr><td><b>${s.ref}</b></td><td>${s.nom}</td><td style="color:#0091DA; font-weight:bold;">${s.qte}</td><td>${s.prix} UM</td><td><span class="badge ${s.qte > 5 ? 'badge-ok' : 'badge-crit'}">${s.qte > 5 ? 'OK' : 'ALERTE'}</span></td></tr>`;
         });
 
-        // Table Ordres de Travail
+        // Table OT
         const otBody = document.getElementById('ot-tbody');
         otBody.innerHTML = '';
         db.ordres.forEach(o => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:700;">#OT-${o.id}</td>
-                <td style="color:#0091DA; font-weight:700;">${o.code}</td>
-                <td>${o.description}</td>
-                <td>${o.piece} (x${o.qteNecessaire})</td>
-                <td><span class="badge badge-maint">${o.etat}</span></td>
-            `;
-            otBody.appendChild(tr);
+            otBody.innerHTML += `<tr><td><b>#OT-${o.id}</b></td><td style="color:#0091DA; font-weight:bold;">${o.code}</td><td>${o.description}</td><td>${o.piece} (x${o.qteNecessaire})</td><td><span class="badge badge-maint">${o.etat}</span></td></tr>`;
         });
     }
 
-    // Nouvelle fonctionnalité : Diagnostic en direct des composants hydrauliques de l'engin
-    function diagnostiquerHydraulique(idx) {
-        let engin = db.engins[idx];
-        if (!engin.circuitHydraulique) {
-            engin.circuitHydraulique = { fuite: false, pressionOk: true, niveauHuile: 100 };
-        }
-        
-        let hydro = engin.circuitHydraulique;
-        let etatFuite = hydro.fuite ? "⚠️ DÉTECTÉE (Perte de fluide)" : "✅ Aucune fuite détectée";
-        let etatPression = hydro.pressionOk ? "✅ Stable / Normale" : "❌ ANORMALE (Chute de pression barométrique)";
-        
-        let message = `Rapport Diagnostique Télémetrique [${engin.code}] :\n\n` +
-                      `- Statut Général : ${engin.statut}\n` +
-                      `- Fuite Externe : ${etatFuite}\n` +
-                      `- Pression du Circuit : ${etatPression}\n` +
-                      `- Niveau Réservoir Huile : ${hydro.niveauHuile}%\n\n` +
-                      `Souhaitez-vous injecter du traceur sous pression pour tester une anomalie forcée ?`;
-                      
-        if (confirm(message)) {
-            // Forcer une simulation de panne hydraulique critique sur cet élément
-            hydro.fuite = true;
-            hydro.pressionOk = false;
-            hydro.niveauHuile = Math.floor(Math.random() * 30) + 10;
-            engin.statut = "Critique";
-            alert("⚠️ Alerte circuit hydraulique compromise ! Données injectées au flux.");
-            save();
-        }
-    }
-
-    async function simulerTelemetrieIoT() {
-        db.engins.forEach(e => {
-            e.heures += Math.floor(Math.random() * 5) + 1;
-            if(e.statut === "Opérationnel") {
-                e.x = Math.max(10, Math.min(90, e.x + (Math.random() * 6 - 3)));
-                e.y = Math.max(10, Math.min(90, e.y + (Math.random() * 6 - 3)));
-            }
-            if(e.heures > 9500 && e.statut === "Opérationnel") e.statut = "Critique";
-            
-            // Simulation IoT sur le réseau hydraulique interne
-            if (e.circuitHydraulique && e.circuitHydraulique.fuite) {
-                e.circuitHydraulique.niveauHuile = Math.max(0, e.circuitHydraulique.niveauHuile - 5);
-                if (e.circuitHydraulique.niveauHuile < 20) e.statut = "Critique";
-            }
-        });
-        
-        save();
-
-        if (navigator.onLine) {
-            try {
-                for (let engin of db.engins) {
-                    await supabaseClient.from('engins').upsert({
-                        code: engin.code,
-                        modele: engin.modele,
-                        heures: engin.heures,
-                        statut: engin.statut,
-                        x_coord: engin.x,
-                        y_coord: engin.y
-                    }, { onConflict: 'code' });
-                }
-                alert("📡 Télémétrie IoT mise à jour et synchronisée sur Supabase Cloud !");
-            } catch (err) {
-                console.error("Échec de synchro Cloud :", err);
-            }
-        } else {
-            alert("⚡ IoT enregistré en local (Hors-ligne).");
-        }
-    }
-
-    function simulerScanQR() {
-        const modal = document.getElementById('qr-reader-modal');
-        modal.style.display = 'flex';
-        html5QrcodeScanner = new Html5Qrcode("reader");
-
-        html5QrcodeScanner.start(
-            { facingMode: "environment" }, 
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            (qrCodeMessage) => {
-                document.getElementById('search-engin').value = qrCodeMessage.trim();
-                fermerScannerQR();
-                renderApp();
-                alert(`🔍 Engin détecté : ${qrCodeMessage}`);
-            },
-            (errorMessage) => {}
-        ).catch((err) => {
-            console.error("Erreur caméra : ", err);
-            alert("Erreur d'accès à la caméra.");
-            fermerScannerQR();
-        });
-    }
-
-    function fermerScannerQR() {
-        const modal = document.getElementById('qr-reader-modal');
-        modal.style.display = 'none';
-        if (html5QrcodeScanner) {
-            html5QrcodeScanner.stop().then(() => {
-                html5QrcodeScanner = null;
-            }).catch(err => console.error("Erreur arrêt caméra", err));
-        }
-    }
-
-    async function stockerLocalement(ordre) {
-        ordre.synchronise = 0;
-        await localDB.ordres_travail.add(ordre);
-        alert("Mode Hors-ligne : Action enregistrée localement sur le téléphone.");
-    }
-
-    async function sauvegarderOrdreTravail(ordre) {
-        if (navigator.onLine) {
-            try {
-                const { error } = await supabaseClient.from('ordres_travail').insert([ordre]);
-                if (error) throw error;
-                console.log("Synchronisé directement sur Supabase !");
-            } catch (err) {
-                console.warn("Échec en ligne, bascule local...", err);
-                await stockerLocalement(ordre);
-            }
-        } else {
-            await stockerLocalement(ordre);
-        }
-    }
-
-    async function ouvrirIntervention(idx) {
-        let engin = db.engins[idx];
-        let typeInterventionParDefaut = "Intervention corrective";
-        
-        // Si une panne hydraulique est identifiée, on oriente l'intitulé de l'OT automatiquement
-        if (engin.circuitHydraulique && engin.circuitHydraulique.fuite) {
-            typeInterventionParDefaut = "Colmatage fuite & Remplacement Fluide Hydraulique";
-        }
-
-        let choixPiece = prompt(`Panne sur ${engin.code}.\nRéférence pièce : FIL-OIL-01, HYD-FLUID-A...`, engin.circuitHydraulique && engin.circuitHydraulique.fuite ? "HYD-FLUID-A" : "FIL-OIL-01");
-        if (!choixPiece) return;
-        
-        let qte = parseInt(prompt("Quantité nécessaire :", engin.circuitHydraulique && engin.circuitHydraulique.fuite ? "50" : "1")) || 1;
-        let p = db.stocks.find(item => item.ref === choixPiece);
-        
-        if(!p) { alert("Référence invalide."); return; }
+    // 🔄 MODE REAL OFFLINE FIRST SUR SMARTPHONE
+    async function simulerOuvrirPanneOffline(codeEngin, refPiece, qte) {
+        let engin = db.engins.find(e => e.code === codeEngin);
+        let piece = db.stocks.find(p => p.ref === refPiece);
+        if(!engin || !piece) return;
 
         engin.statut = "Maintenance";
-
-        const nouvelOrdre = {
+        
+        let nouvelOT = {
             id: Math.floor(100 + Math.random() * 900),
-            code: engin.code,
-            description: typeInterventionParDefaut,
-            piece: choixPiece,
+            code: codeEngin,
+            description: "Maintenance Corrective d'Urgence",
+            piece: refPiece,
             qteNecessaire: qte,
-            etat: "En cours"
+            etat: "En Cours"
         };
+        db.ordres.push(nouvelOT);
 
-        db.ordres.push(nouvelOrdre);
+        // Payload pour Supabase mis en attente
+        let cloudPayload = { id: nouvelOT.id, code_engin: codeEngin, type_intervention: nouvelOT.description, statut: nouvelOT.etat };
+
+        if (navigator.onLine) {
+            try {
+                await supabaseClient.from('ordres_travail').insert([cloudPayload]);
+            } catch(e) {
+                db.offlineQueue.push(cloudPayload);
+            }
+        } else {
+            db.offlineQueue.push(cloudPayload);
+        }
         save();
-
-        await sauvegarderOrdreTravail({
-            id: nouvelOrdre.id,
-            code_engin: nouvelOrdre.code,
-            type_intervention: nouvelOrdre.description,
-            statut: nouvelOrdre.etat,
-            matricule: currentUser ? currentUser.matricule : 'UNKNOWN'
-        });
     }
 
+    // 🧼 CLÔTURE AUTOMATISÉE AVEC RECALCUL DES KPIS EN DIRECT
     function cloturerIntervention(idx) {
         let engin = db.engins[idx];
         let otIdx = db.ordres.findIndex(o => o.code === engin.code);
@@ -998,191 +875,66 @@
             let ot = db.ordres[otIdx];
             let pieceStock = db.stocks.find(s => s.ref === ot.piece);
             
-            if (pieceStock) {
-                if(pieceStock.qte >= ot.qteNecessaire) {
-                    pieceStock.qte -= ot.qteNecessaire;
-                    db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
-                    db.ordres.splice(otIdx, 1);
-                    alert("Intervention clôturée et validée ! Stock mis à jour.");
-                } else {
-                    alert("Erreur : Stock insuffisant !");
-                    return;
-                }
+            if (pieceStock && pieceStock.qte >= ot.qteNecessaire) {
+                pieceStock.qte -= ot.qteNecessaire; // Déduction auto de la pièce
+                db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire); // Recalcul direct du KPI Budget
+                db.ordres.splice(otIdx, 1);
             }
         }
-        
-        // Restauration des paramètres du circuit lors du passage en Opérationnel
         engin.statut = "Opérationnel";
-        engin.circuitHydraulique = { fuite: false, pressionOk: true, niveauHuile: 100 };
         save();
     }
 
-    function ajouterNouvelEngin() {
-        let code = prompt("Code Engin (ex: TR-09) :"); if (!code) return;
-        let modele = prompt("Modèle / Description :") || "Engin non spécifié";
-        let randomX = Math.floor(Math.random() * 60) + 20;
-        let randomY = Math.floor(Math.random() * 60) + 20;
-        
-        db.engins.push({ 
-            code: code.toUpperCase().trim(), 
-            modele: modele.trim(), 
-            heures: 0, 
-            statut: "Opérationnel",
-            x: randomX,
-            y: randomY,
-            circuitHydraulique: { fuite: false, pressionOk: true, niveauHuile: 100 }
-        });
-        save();
-    }
-
-    function supprimerEngin(idx) {
-        if(confirm("Supprimer cet actif du parc ?")) {
-            db.engins.splice(idx, 1);
-            save();
-        }
-    }
-
-    function afficherQRCodeEngin(codeEngin) {
-        const urlQR = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(codeEngin)}`;
-        
-        const modale = document.createElement('div');
-        modale.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:9999; color:black;";
-        modale.id = "modale-qr";
-        
-        modale.innerHTML = `
-            <div style="background:white; padding:20px; border-radius:10px; text-align:center; max-width:90%;">
-                <h3 style="margin-top:0; color:black;">QR Code : ${codeEngin}</h3>
-                <img src="${urlQR}" alt="QR Code" style="margin:15px 0; border:1px solid #ccc; display:block; margin-left:auto; margin-right:auto; width:200px; height:200px;"/>
-                <p style="font-size:12px; color:#666;">À coller sur l'engin pour scan rapide</p>
-                <button onclick="window.print()" style="background:#008631; color:white; border:none; padding:10px 15px; border-radius:5px; margin-right:10px; cursor:pointer;">Imprimer</button>
-                <button onclick="document.getElementById('modale-qr').remove()" style="background:#cc0000; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Fermer</button>
-            </div>
-        `;
-        document.body.appendChild(modale);
-    }
-
-    function arreterAlerte() {
-        clearInterval(intervalleBip);
-        if (navigator.vibrate) navigator.vibrate(0);
-    }
-
-    function nettoyerEtOuvrirPDF(ot) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor(231, 76, 60); 
-        doc.text("SNIM GMAO - INTERVENTION PRÉVENTIVE CRITIQUE", 14, 20);
-
-        doc.line(14, 25, 196, 25);
-        doc.setFontSize(12);
-        doc.setTextColor(0);
-        doc.text(`Identifiant Ordre : #OT-${ot.id || 'AUTO'}`, 14, 40);
-        doc.text(`Code Engin Concerné : ${ot.code_engin}`, 14, 50);
-        doc.text(`Type d'Intervention : ${ot.type_intervention}`, 14, 60);
-        doc.text(`Pièces Matérielles Requises : ${ot.piece_assignee || 'FIL-OIL-01 (x2)'}`, 14, 70);
-        
-        doc.setFont("helvetica", "italic");
-        doc.text("Instructions pour le Chef d'Équipe :", 14, 100);
-        doc.setFont("helvetica", "normal");
-        doc.text("- Imprimer cette fiche pour le mécanicien assigné.", 14, 110);
-        doc.text("- Sortir les pièces associées des stocks MRO.", 14, 120);
-
-        doc.output('dataurlnewwindow'); 
-    }
-
-    function declencherAlerteUrgente(ot) {
-        let repetitions = 0;
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function emettreBipEtVibration() {
-            if (repetitions >= 5) {
-                arreterAlerte();
-                nettoyerEtOuvrirPDF(ot);
-                return;
-            }
-            if (navigator.vibrate) navigator.vibrate(500);
-
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
-            repetitions++;
-        }
-
-        emettreBipEtVibration();
-        intervalleBip = setInterval(emettreBipEtVibration, 4000);
-
-        window.addEventListener('touchstart', () => {
-            arreterAlerte();
-            nettoyerEtOuvrirPDF(ot);
-        }, { once: true });
-    }
-
-    async function synchroniserDonneesBidirectionnel() {
-        if (!navigator.onLine) return;
+    async function synchroniserDonneesOffline() {
+        if (!navigator.onLine || db.offlineQueue.length === 0) return;
         try {
-            const { data: ordresCloud, error: errCloud } = await supabaseClient.from('ordres_travail').select('*');
-            if (errCloud) throw errCloud;
-
-            if (ordresCloud) {
-                for (let ordreC of ordresCloud) {
-                    const localOrdre = await localDB.ordres_travail.get({ code_engin: ordreC.code_engin });
-                    if (!localOrdre) {
-                        ordreC.synchronise = 1;
-                        await localDB.ordres_travail.add(ordreC);
-                    }
-                }
+            for (let i = db.offlineQueue.length - 1; i >= 0; i--) {
+                const { error } = await supabaseClient.from('ordres_travail').insert([db.offlineQueue[i]]);
+                if (!error) db.offlineQueue.splice(i, 1);
             }
-            const ordresNonSynchros = await localDB.ordres_travail.where('synchronise').equals(0).toArray();
-            for (let ordreL of ordresNonSynchros) {
-                const backupId = ordreL.id;
-                delete ordreL.id; 
-                delete ordreL.synchronise;
-
-                const { error: errPush } = await supabaseClient.from('ordres_travail').upsert({
-                    code_engin: ordreL.code_engin,
-                    type_intervention: ordreL.type_intervention,
-                    statut: ordreL.statut,
-                    matricule: ordreL.matricule
-                }, { onConflict: 'code_engin' });
-
-                if (!errPush) await localDB.ordres_travail.update(backupId, { synchronise: 1 });
-            }
-            renderApp();
-        } catch (error) {
-            console.error("Échec de la synchro :", error);
-        }
+            save();
+            alert("📡 Connexion 4G rétablie : Les ordres de travail hors-ligne ont été synchronisés sur le Cloud Supabase !");
+        } catch(e) { console.error(e); }
     }
 
-    // Initialisation
+    // 🏭 SIMULATION DYNAMIQUE DES TEMPÉRATURES ET VIBRATIONS DE GUELB (I & II)
+    function initGuelbTelemetry() {
+        setInterval(() => {
+            document.getElementById('guelb1-temp').innerText = (70 + Math.random() * 8).toFixed(1) + " °C";
+            document.getElementById('guelb1-vib').innerText = (3.5 + Math.random() * 2).toFixed(1) + " mm/s";
+            document.getElementById('guelb2-temp').innerText = (78 + Math.random() * 7).toFixed(1) + " °C";
+            document.getElementById('guelb2-vib').innerText = (5.0 + Math.random() * 2.5).toFixed(1) + " mm/s";
+        }, 3000);
+    }
+
+    function simulerScanQR() {
+        const modal = document.getElementById('qr-reader-modal');
+        modal.style.display = 'flex';
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (msg) => {
+                document.getElementById('search-engin').value = msg.trim();
+                fermerScannerQR();
+                renderApp();
+            },
+            () => {}
+        ).catch(() => { fermerScannerQR(); });
+    }
+
+    function fermerScannerQR() {
+        document.getElementById('qr-reader-modal').style.display = 'none';
+        if (html5QrcodeScanner) { html5QrcodeScanner.stop(); }
+    }
+
+    function simulerTelemetrieIoT() {
+        db.engins.forEach(e => { e.heures += 2; });
+        save();
+    }
+
+    mettreAJourStatutReseau();
     renderApp();
-
-    // Filtre dynamique du magasin MRO
-    document.getElementById('recherche-magasin').addEventListener('input', function(e) {
-        const saisie = e.target.value.toLowerCase().trim();
-        const lignes = document.querySelectorAll('#stock-tbody tr');
-        lignes.forEach(ligne => {
-            const colReference = ligne.children[0] ? ligne.children[0].textContent.toLowerCase() : '';
-            const colDesignation = ligne.children[1] ? ligne.children[1].textContent.toLowerCase() : '';
-            ligne.style.display = (colReference.includes(saisie) || colDesignation.includes(saisie)) ? "" : "none";
-        });
-    });
-
-    // Supabase Channel Subscription
-    supabaseClient
-      .channel('table-db-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ordres_travail' }, payload => {
-        const nouvelOT = payload.new;
-        if (nouvelOT.matricule === 'SYSTEM') declencherAlerteUrgente(nouvelOT);
-      })
-      .subscribe();
 </script>
 </body>
 </html>
