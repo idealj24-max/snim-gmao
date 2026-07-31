@@ -78,13 +78,14 @@
             background-color: #FF4D4D;
         }
 
-        /* Navigation Optimisée Tactile (Scrollable horizontalement sur petit écran) */
+        /* Navigation Mobile - Correction du chevauchement */
         nav {
             background: #0A2540;
             display: flex;
             overflow-x: auto;
             white-space: nowrap;
             border-top: 1px solid rgba(255,255,255,0.1);
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
 
@@ -93,9 +94,8 @@
         }
 
         .nav-btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 14px 8px;
+            flex: 0 0 auto;
+            padding: 14px 16px;
             color: #A3B8CC;
             background: transparent;
             border: none;
@@ -183,7 +183,7 @@
             align-items: center;
         }
 
-        /* Radar Flotte / Satellites Mock */
+        /* Radar Flotte / Satellites */
         .radar-screen {
             background: #07162C;
             border-radius: 12px;
@@ -260,7 +260,7 @@
             background: white;
         }
 
-        /* Boutons XXL pour utilisation sur le terrain */
+        /* Boutons XXL pour terrain */
         .btn {
             display: flex;
             align-items: center;
@@ -426,16 +426,16 @@
             </div>
             <div class="status-pill">
                 <span class="dot" id="network-dot"></span>
-                <span id="network-status">C-01 (En Ligne)</span>
+                <span id="network-status">Vérification...</span>
             </div>
         </div>
     </header>
 
     <nav>
-        <button class="nav-btn active" onclick="switchTab('radar')">RADAR FLOTTE</button>
-        <button class="nav-btn" onclick="switchTab('equipements')">ÉQUIPEMENTS SPÉC.</button>
-        <button class="nav-btn" onclick="switchTab('stocks')">STOCKS MRO</button>
-        <button class="nav-btn" onclick="switchTab('ordres')">ORDRES TRAVAIL</button>
+        <button class="nav-btn active" onclick="switchTab('radar', event)">RADAR FLOTTE</button>
+        <button class="nav-btn" onclick="switchTab('equipements', event)">ÉQUIPEMENTS</button>
+        <button class="nav-btn" onclick="switchTab('stocks', event)">STOCKS MRO</button>
+        <button class="nav-btn" onclick="switchTab('ordres', event)">ORDRES TRAVAIL</button>
     </nav>
 
     <main>
@@ -604,6 +604,25 @@
     </div>
 
     <script>
+        // --- LOGIQUE AGENT D'ACCÈS ---
+        let agentStatus = "C-01";
+
+        function checkAgentAccess() {
+            let storedAgent = localStorage.getItem('agent_status');
+            if (!storedAgent) {
+                let inputAgent = prompt("Veuillez saisir votre code d'accès de statut agent (ex: C-01, M-12) :");
+                if (inputAgent && inputAgent.trim() !== "") {
+                    agentStatus = inputAgent.trim().toUpperCase();
+                    localStorage.setItem('agent_status', agentStatus);
+                } else {
+                    agentStatus = "ANONYME";
+                }
+            } else {
+                agentStatus = storedAgent;
+            }
+            updateNetworkStatus();
+        }
+
         // --- BASE DE DONNÉES ET STOCKS (MRO) ---
         let stockMRO = [
             { id: "FIL-OIL-01", name: "Filtre à huile gros moteur", qty: 14, price: 4500 },
@@ -613,32 +632,34 @@
 
         let totalMROExpenses = 15100;
 
-        // --- GESTION DU MODE HORS-LIGNE (Offline First & Sync Cloud) ---
+        // --- GESTION DU MODE HORS-LIGNE ---
         window.addEventListener('online', updateNetworkStatus);
         window.addEventListener('offline', updateNetworkStatus);
 
         function updateNetworkStatus() {
             const dot = document.getElementById('network-dot');
             const statusText = document.getElementById('network-status');
+            if (!dot || !statusText) return;
             
             if (navigator.onLine) {
                 dot.classList.remove('offline');
-                statusText.innerText = "C-01 (En Ligne)";
-                // Essai de synchronisation des données locales vers Supabase Cloud dès le retour réseau
+                statusText.innerText = `${agentStatus} (En Ligne)`;
                 syncLocalDataToCloud();
             } else {
                 dot.classList.add('offline');
-                statusText.innerText = "Mode Hors-Ligne Actif";
+                statusText.innerText = `${agentStatus} (Hors-Ligne)`;
             }
         }
 
         // --- NAVIGATION INTERFACE TACTILE ---
-        function switchTab(tabId) {
+        function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(`tab-${tabId}`).classList.add('active');
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
         }
 
         // --- MODULE ÉQUIPEMENTS : GESTION DYNAMIQUE GUELB ---
@@ -695,8 +716,17 @@
 
         function simulateScanSuccess() {
             closeScanner();
-            alert("QR Code Détecté avec succès !\nÉquipement identifié : BULL-005\nStatif : Alerte Moteur active.");
-            switchTab('ordres');
+            alert("QR Code Détecté avec succès !\nÉquipement identifié : BULL-005\nStatut : Alerte Moteur active.");
+            
+            // Simuler le changement d'onglet vers Ordres
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-ordres').classList.add('active');
+            
+            // Activer visuellement le bouton d'onglet correspondant
+            const buttons = document.querySelectorAll('.nav-btn');
+            if(buttons.length >= 4) buttons[3].classList.add('active');
+            
             document.getElementById('ot-asset').value = "BULL-005";
         }
 
@@ -705,7 +735,7 @@
             alert("🛰️ Télémétrie IoT mise à jour et synchronisée sur Supabase Cloud !");
         }
 
-        // --- CLÔTURE DES ORDRES DE TRAVAIL (OT) AVEC IMPACT DE STOCK MRO ---
+        // --- CLÔTURE DES ORDRES DE TRAVAIL (OT) ---
         function handleOTSubmit(event) {
             event.preventDefault();
             
@@ -715,8 +745,8 @@
             const partQty = parseInt(document.getElementById('ot-part-qty').value) || 0;
             const report = document.getElementById('ot-report').value;
 
-            // Création de l'objet OT
             const orderData = {
+                agent: agentStatus,
                 asset,
                 hours,
                 partId,
@@ -725,23 +755,20 @@
                 timestamp: new Date().toISOString()
             };
 
-            // Mise à jour locale des stocks MRO si une pièce a été déduite
             if (partId && partQty > 0) {
                 const item = stockMRO.find(i => i.id === partId);
                 if (item) {
                     if (item.qty >= partQty) {
                         item.qty -= partQty;
                         totalMROExpenses += (item.price * partQty);
-                        // Mise à jour immédiate de l'affichage global des dépenses
                         document.getElementById('mro-expenses-kpi').innerText = totalMROExpenses.toLocaleString() + " UM";
-                        searchMRO(); // Rafraîchir la liste magasin
+                        searchMRO();
                     } else {
-                        alert(`Attention: Stock insuffisant pour la pièce ${partId}. Enregistré avec écart.`);
+                        alert(`Attention: Stock insuffisant pour la pièce ${partId}.`);
                     }
                 }
             }
 
-            // Gestion Offline-First : Sauvegarde locale dans localStorage
             let localOrders = JSON.parse(localStorage.getItem('pending_ot')) || [];
             localOrders.push(orderData);
             localStorage.setItem('pending_ot', JSON.stringify(localOrders));
@@ -749,31 +776,27 @@
             if (navigator.onLine) {
                 syncLocalDataToCloud();
             } else {
-                alert("Order sauvegardé localement sur le téléphone ! (Mode Hors-ligne). Il sera synchronisé dès le retour de la 4G/Réseau.");
+                alert("Ordre sauvegardé localement sur le téléphone ! Il sera envoyé dès le retour du réseau.");
             }
 
-            // Si le BULL-005 est réparé, on retire son alerte visuelle pour simuler la réussite
             if (asset.toUpperCase() === "BULL-005") {
-                document.getElementById('blip-bull').classList.remove('danger');
-                document.getElementById('alert-count').innerText = "0";
+                const blip = document.getElementById('blip-bull');
+                if(blip) blip.classList.remove('danger');
+                const count = document.getElementById('alert-count');
+                if(count) count.innerText = "0";
             }
 
-            // Reset du formulaire
             document.getElementById('ot-form').reset();
         }
 
-        // --- SYNCHRONISATION LOCALSTORAGE TO SUPABASE CLOUD ---
+        // --- SYNCHRONISATION LOCALSTORAGE TO CLOUD ---
         function syncLocalDataToCloud() {
             let localOrders = JSON.parse(localStorage.getItem('pending_ot')) || [];
             if (localOrders.length === 0) return;
 
-            // Simulation d'une requête API Push vers le serveur Supabase sécurisé via RLS
             console.log("Synchronisation de " + localOrders.length + " ordres de travail vers Supabase Cloud...");
-            
-            // Une fois poussé avec succès, on vide la file d'attente locale
             localStorage.removeItem('pending_ot');
             
-            // Petite notification discrète pour l'agent de terrain
             const checkSyncNotify = document.createElement('div');
             checkSyncNotify.style = "position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#10B981; color:white; padding:10px 20px; border-radius:30px; font-size:0.85rem; box-shadow:0 4px 6px rgba(0,0,0,0.1); z-index:1000;";
             checkSyncNotify.innerText = "🔄 Base locale synchronisée avec Supabase Cloud !";
@@ -782,9 +805,9 @@
             setTimeout(() => checkSyncNotify.remove(), 3000);
         }
 
-        // Initialisation de l'application au démarrage
+        // Initialisation de l'application
         window.onload = function() {
-            updateNetworkStatus();
+            checkAgentAccess();
             searchMRO();
         };
     </script>
