@@ -12,10 +12,10 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
 
+        /* CORRECTION DU LAYOUT : Remplacement de flex par block pour libérer les hitboxes tactiles */
         body {
             color: #0F1E36;
-            display: flex;
-            flex-direction: column;
+            display: block;
             min-height: 100vh;
             position: relative;
             background-color: #0b132b;
@@ -185,7 +185,7 @@
             text-transform: uppercase;
             white-space: nowrap;
             text-align: center;
-            min-height: 48px; /* Optimisation tactile globale */
+            min-height: 48px;
         }
 
         .tab-btn.active {
@@ -199,7 +199,6 @@
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
-            flex: 1;
             padding-bottom: 5rem;
         }
 
@@ -331,6 +330,7 @@
             display: flex;
             gap: 8px;
             margin-bottom: 12px;
+            align-items: center;
         }
 
         .search-input {
@@ -352,7 +352,17 @@
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            min-height: 48px; /* Zone tactile minimale 48px */
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BOUTON AJOUT BLEU ET INTEGRE */
+        .btn-add-engin {
+            background: #0091DA;
+            color: white;
+            font-weight: 700;
         }
 
         .btn-iot { background: #10B981; }
@@ -408,16 +418,12 @@
             font-size: 0.7rem;
             cursor: pointer;
             color: white;
-            min-height: 48px; /* Zone tactile confortable pour les gants */
+            min-height: 48px;
         }
 
-        .btn-sm-maint { background: #F59E0B; }
         .btn-sm-clear { background: #10B981; }
         .btn-sm-del { background: #EF4444; }
-        .btn-sm-qr { background: #1E3A8A; }
-        .btn-sm-check { background: #8B5CF6; }
 
-        /* FAB OPTIMISÉ POUR OUVRIR L'APPAREIL PHOTO INSTANTANÉMENT */
         .floating-btn {
             position: fixed;
             bottom: 20px;
@@ -442,7 +448,6 @@
             fill: white;
         }
 
-        /* Styles Spécifiques Usines Guelb & Voies */
         .guelb-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -513,9 +518,34 @@
             padding: 12px 1rem;
             font-size: 0.7rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
         }
 
         footer strong { color: #38BDF8; }
+
+        /* MODALE POPUP GENERALISEE POUR LES NOUVEAUX ENGINS */
+        .gmao-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 19, 43, 0.9);
+            z-index: 10050;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .modal-card h3 {
+            margin-bottom: 12px;
+            color: #1C2541;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -601,9 +631,13 @@
             <h2>Suivi du Matériel et Télémétrie 
                 <button class="btn-action btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT GPS</button>
             </h2>
+            
+            <!-- TOOLBAR CORRIGÉE : Intégration claire du bouton d'ajout bleu -->
             <div class="tool-bar" style="margin-top: 10px;">
                 <input type="text" id="search-engin" class="search-input" placeholder="🔍 Scanner QR ou taper code..." oninput="renderApp()">
+                <button class="btn-action btn-add-engin" onclick="ouvrirModaleAjout()">＋ Ajouter Engin</button>
             </div>
+            
             <div class="table-container">
                 <table>
                     <thead>
@@ -612,7 +646,7 @@
                             <th>Modèle / Engin</th>
                             <th>Heures Moteur</th>
                             <th>Statut</th>
-                            <th id="th-actions-header">Actions</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="parc-tbody"></tbody>
@@ -621,7 +655,7 @@
         </div>
     </div>
 
-    <!-- NOUVEAU : ENGINS ET COMPOSANTS SPÉCIFIQUES (GUELB & VOIES) -->
+    <!-- GUELB & VOIES -->
     <div id="tab-guelb" class="tab-content">
         <div class="card">
             <h2>Usines d'Enrichissement Guelb I & II (Télémétrie)</h2>
@@ -696,6 +730,29 @@
     </div>
 </main>
 
+<!-- MODALE FORMULAIRE AJOUT ENGIN -->
+<div id="add-engin-modal" class="gmao-modal">
+    <div class="modal-card">
+        <h3>Nouvel Engin Industriel</h3>
+        <div class="form-group">
+            <label>Code Engin (ex: EXC-015)</label>
+            <input type="text" id="new-code" class="form-control" placeholder="EXC-XXX">
+        </div>
+        <div class="form-group">
+            <label>Modèle & Spécification</label>
+            <input type="text" id="new-modele" class="form-control" placeholder="Caterpillar 6060 / Komatsu">
+        </div>
+        <div class="form-group">
+            <label>Heures Moteur Initiales</label>
+            <input type="number" id="new-heures" class="form-control" value="0">
+        </div>
+        <div style="display:flex; gap:8px; margin-top:15px;">
+            <button class="btn-action" style="background:#EF4444; flex:1;" onclick="fermerModaleAjout()">Annuler</button>
+            <button class="btn-action" style="background:#10B981; flex:1;" onclick="enregistrerNouvelEngin()">Sauvegarder</button>
+        </div>
+    </div>
+</div>
+
 <div id="qr-reader-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; text-align: center;">
         <h3 style="color: #1C2541; margin-bottom: 15px;">Scanner le Code Engin</h3>
@@ -704,7 +761,6 @@
     </div>
 </div>
 
-<!-- LE FAB CRÉE DÉSORMAIS UN ACCÈS DIRECT AU SCANNER CAMERA (OPTIMISATION TACTILE GANTS) -->
 <button id="floating-scan-btn" class="floating-btn" onclick="simulerScanQR()">
     <svg viewBox="0 0 24 24"><path d="M4 4h6V2H4c-1.1 0-2 .9-2 2v6h2V4zm16-2h-6v2h6v6h2V4c0-1.1-.9-2-2-2zM4 20h6v2H4c-1.1 0-2-.9-2-2v-6h2v6zm16 2h-6v-2h6v-6h2v6c0 1.1-.9 2-2 2zM7 7h10v10H7V7z"/></svg>
 </button>
@@ -721,7 +777,6 @@
     let currentUser = null;
     let html5QrcodeScanner = null;
 
-    // Base de données unifiée locale synchronisée (Hybride localStorage local)
     let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v5')) || {
         engins: [
             { code: "EXC-012", modele: "Excavatrice Caterpillar 6060", heures: 4850, statut: "Opérationnel", x: 25, y: 40 },
@@ -736,7 +791,7 @@
             { id: 101, code: "TOMB-088", description: "Remplacement préventif filtres", piece: "FIL-OIL-01", qteNecessaire: 2, etat: "En Cours" }
         ],
         coutTotalMRO: 15100,
-        offlineQueue: [] // File d'attente réelle pour la synchronisation Supabase
+        offlineQueue: []
     };
 
     window.addEventListener('online', () => { mettreAJourStatutReseau(); synchroniserDonneesOffline(); });
@@ -776,7 +831,43 @@
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabId).classList.add('active');
-        if(event && event.currentTarget) event.currentTarget.classList.add('active');
+        if(window.event && window.event.currentTarget) window.event.currentTarget.classList.add('active');
+    }
+
+    function ouvrirModaleAjout() {
+        document.getElementById('add-engin-modal').style.display = 'flex';
+    }
+
+    function fermerModaleAjout() {
+        document.getElementById('add-engin-modal').style.display = 'none';
+    }
+
+    function enregistrerNouvelEngin() {
+        let code = document.getElementById('new-code').value.trim().toUpperCase();
+        let modele = document.getElementById('new-modele').value.trim();
+        let heures = parseInt(document.getElementById('new-heures').value) || 0;
+
+        if(!code || !modele) {
+            alert("Veuillez remplir les informations de l'engin.");
+            return;
+        }
+
+        db.engins.push({
+            code: code,
+            modele: modele,
+            heures: heures,
+            statut: "Opérationnel",
+            x: Math.floor(15 + Math.random() * 70),
+            y: Math.floor(15 + Math.random() * 70)
+        });
+
+        save();
+        fermerModaleAjout();
+        
+        // Reset champs
+        document.getElementById('new-code').value = '';
+        document.getElementById('new-modele').value = '';
+        document.getElementById('new-heures').value = '0';
     }
 
     function renderApp() {
@@ -805,27 +896,26 @@
                     <td style="font-weight:700;">📍 ${e.code}</td>
                     <td>${e.modele}</td>
                     <td>${e.heures} h</td>
-                    <td><span class="badge ${e.statut === 'Opérationnel' ? 'badge-ok' : 'badge-crit'}">${e.statut}</span></td>
-                    <td>
-                        <button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Clôturer / Dispo</button>
+                    <td><span class="badge ${e.statut === 'Opérationnel' ? 'badge-ok' : (e.statut === 'Maintenance' ? 'badge-maint' : 'badge-crit')}">${e.statut}</span></td>
+                    <td class="action-btns">
+                        <button class="btn-sm btn-sm-clear" onclick="cloturerIntervention(${idx})">Dispo</button>
+                        <button class="btn-sm btn-sm-del" onclick="supprimerEngin(${idx})">Suppr</button>
                     </td>
                 `;
                 parcBody.appendChild(tr);
             }
         });
 
-        document.getElementById('kpi-dispo').innerText = Math.round((dispoEngins / totalEngins) * 100) + "%";
+        document.getElementById('kpi-dispo').innerText = totalEngins > 0 ? Math.round((dispoEngins / totalEngins) * 100) + "%" : "0%";
         document.getElementById('kpi-alertes').innerText = alertesCritiques;
         document.getElementById('kpi-budget').innerText = db.coutTotalMRO.toLocaleString() + " UM";
 
-        // Table Stocks
         const stockBody = document.getElementById('stock-tbody');
         stockBody.innerHTML = '';
         db.stocks.forEach(s => {
             stockBody.innerHTML += `<tr><td><b>${s.ref}</b></td><td>${s.nom}</td><td style="color:#0091DA; font-weight:bold;">${s.qte}</td><td>${s.prix} UM</td><td><span class="badge ${s.qte > 5 ? 'badge-ok' : 'badge-crit'}">${s.qte > 5 ? 'OK' : 'ALERTE'}</span></td></tr>`;
         });
 
-        // Table OT
         const otBody = document.getElementById('ot-tbody');
         otBody.innerHTML = '';
         db.ordres.forEach(o => {
@@ -833,40 +923,13 @@
         });
     }
 
-    // 🔄 MODE REAL OFFLINE FIRST SUR SMARTPHONE
-    async function simulerOuvrirPanneOffline(codeEngin, refPiece, qte) {
-        let engin = db.engins.find(e => e.code === codeEngin);
-        let piece = db.stocks.find(p => p.ref === refPiece);
-        if(!engin || !piece) return;
-
-        engin.statut = "Maintenance";
-        
-        let nouvelOT = {
-            id: Math.floor(100 + Math.random() * 900),
-            code: codeEngin,
-            description: "Maintenance Corrective d'Urgence",
-            piece: refPiece,
-            qteNecessaire: qte,
-            etat: "En Cours"
-        };
-        db.ordres.push(nouvelOT);
-
-        // Payload pour Supabase mis en attente
-        let cloudPayload = { id: nouvelOT.id, code_engin: codeEngin, type_intervention: nouvelOT.description, statut: nouvelOT.etat };
-
-        if (navigator.onLine) {
-            try {
-                await supabaseClient.from('ordres_travail').insert([cloudPayload]);
-            } catch(e) {
-                db.offlineQueue.push(cloudPayload);
-            }
-        } else {
-            db.offlineQueue.push(cloudPayload);
+    function supprimerEngin(idx) {
+        if(confirm("Confirmer la suppression définitive de cet engin du parc ?")) {
+            db.engins.splice(idx, 1);
+            save();
         }
-        save();
     }
 
-    // 🧼 CLÔTURE AUTOMATISÉE AVEC RECALCUL DES KPIS EN DIRECT
     function cloturerIntervention(idx) {
         let engin = db.engins[idx];
         let otIdx = db.ordres.findIndex(o => o.code === engin.code);
@@ -876,8 +939,8 @@
             let pieceStock = db.stocks.find(s => s.ref === ot.piece);
             
             if (pieceStock && pieceStock.qte >= ot.qteNecessaire) {
-                pieceStock.qte -= ot.qteNecessaire; // Déduction auto de la pièce
-                db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire); // Recalcul direct du KPI Budget
+                pieceStock.qte -= ot.qteNecessaire;
+                db.coutTotalMRO += (pieceStock.prix * ot.qteNecessaire);
                 db.ordres.splice(otIdx, 1);
             }
         }
@@ -893,17 +956,18 @@
                 if (!error) db.offlineQueue.splice(i, 1);
             }
             save();
-            alert("📡 Connexion 4G rétablie : Les ordres de travail hors-ligne ont été synchronisés sur le Cloud Supabase !");
+            alert("📡 Connexion rétablie : Les ordres hors-ligne ont été synchronisés !");
         } catch(e) { console.error(e); }
     }
 
-    // 🏭 SIMULATION DYNAMIQUE DES TEMPÉRATURES ET VIBRATIONS DE GUELB (I & II)
     function initGuelbTelemetry() {
         setInterval(() => {
-            document.getElementById('guelb1-temp').innerText = (70 + Math.random() * 8).toFixed(1) + " °C";
-            document.getElementById('guelb1-vib').innerText = (3.5 + Math.random() * 2).toFixed(1) + " mm/s";
-            document.getElementById('guelb2-temp').innerText = (78 + Math.random() * 7).toFixed(1) + " °C";
-            document.getElementById('guelb2-vib').innerText = (5.0 + Math.random() * 2.5).toFixed(1) + " mm/s";
+            if(document.getElementById('guelb1-temp')) {
+                document.getElementById('guelb1-temp').innerText = (70 + Math.random() * 8).toFixed(1) + " °C";
+                document.getElementById('guelb1-vib').innerText = (3.5 + Math.random() * 2).toFixed(1) + " mm/s";
+                document.getElementById('guelb2-temp').innerText = (78 + Math.random() * 7).toFixed(1) + " °C";
+                document.getElementById('guelb2-vib').innerText = (5.0 + Math.random() * 2.5).toFixed(1) + " mm/s";
+            }
         }, 3000);
     }
 
@@ -925,7 +989,9 @@
 
     function fermerScannerQR() {
         document.getElementById('qr-reader-modal').style.display = 'none';
-        if (html5QrcodeScanner) { html5QrcodeScanner.stop(); }
+        if (html5QrcodeScanner) { 
+            html5QrcodeScanner.stop().catch(err => console.log(err)); 
+        }
     }
 
     function simulerTelemetrieIoT() {
