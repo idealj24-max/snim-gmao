@@ -213,7 +213,7 @@
             grid-template-columns: 1fr;
         }
 
-        .stat-card {
+        .stats-grid .stat-card {
             background: rgba(255, 255, 255, 0.98);
             padding: 12px 10px;
             border-radius: 10px;
@@ -306,11 +306,22 @@
             cursor: pointer;
             border: 2px solid white;
             box-shadow: 0 0 10px rgba(255,255,255,0.5);
-            transition: all 0.5s ease;
+            transition: all 1s ease-in-out; /* Mouvement fluide en direct */
         }
 
         .blip-running { background-color: #10B981; box-shadow: 0 0 12px #10B981; }
         .blip-stopped { background-color: #EF4444; box-shadow: 0 0 12px #EF4444; }
+
+        /* Animation pulsation pour simuler le flux en direct actif */
+        .blip-running.pulse-active {
+            animation: blipPulse 1.5s infinite;
+        }
+
+        @keyframes blipPulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
 
         .blip-label {
             position: absolute;
@@ -356,6 +367,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:active {
+            transform: scale(0.96); /* Feedback tactile mobile */
         }
 
         /* BOUTON AJOUT BLEU ET INTEGRE */
@@ -365,7 +381,9 @@
             font-weight: 700;
         }
 
-        .btn-iot { background: #10B981; }
+        /* Classes dynamiques pour changer le style du bouton IoT */
+        .btn-iot { background: #64748B; transition: background 0.3s ease; }
+        .btn-iot.active { background: #10B981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
 
         .table-container {
             overflow-x: auto;
@@ -621,7 +639,7 @@
     <!-- RADAR FLOTTE -->
     <div id="tab-parc" class="tab-content active">
         <div class="card">
-            <h2>Suivi Cartographique Satellitaire (Live)</h2>
+            <h2>Suivi Cartographique Satellitaire (<span id="radar-status-text">Pause</span>)</h2>
             <div class="radar-container" id="radar-screen">
                 <div class="radar-grid"></div>
             </div>
@@ -629,7 +647,7 @@
 
         <div class="card">
             <h2>Suivi du Matériel et Télémétrie 
-                <button class="btn-action btn-iot" onclick="simulerTelemetrieIoT()">⚡ Flux IoT GPS</button>
+                <button id="btn-iot-flux" class="btn-action btn-iot" onclick="simulerTelemetrieIoT()">⚡ Activer Flux IoT GPS</button>
             </h2>
             
             <!-- TOOLBAR CORRIGÉE : Intégration claire du bouton d'ajout bleu -->
@@ -776,6 +794,10 @@
 
     let currentUser = null;
     let html5QrcodeScanner = null;
+    
+    // Variables pour le contrôle de l'état du flux IoT GPS global
+    let iotFluxInterval = null;
+    let isIotActive = false;
 
     let db = JSON.parse(localStorage.getItem('snim_gmao_enterprise_v5')) || {
         engins: [
@@ -885,7 +907,8 @@
             if (e.statut === "Critique") alertesCritiques++;
 
             let blip = document.createElement('div');
-            blip.className = `radar-blip ${e.statut === "Opérationnel" ? "blip-running" : "blip-stopped"}`;
+            // Ajout dynamique de la classe pulse-active si le flux IoT tourne
+            blip.className = `radar-blip ${e.statut === "Opérationnel" ? "blip-running" : "blip-stopped"} ${isIotActive ? 'pulse-active' : ''}`;
             blip.style.left = `${e.x}%`; blip.style.top = `${e.y}%`;
             blip.innerHTML = `<span class="blip-label">${e.code}</span>`;
             radarScreen.appendChild(blip);
@@ -994,9 +1017,49 @@
         }
     }
 
+    /* CORRECTION COMPLÈTE DU FLUX IOT & DES MOUVEMENTS RADAR */
     function simulerTelemetrieIoT() {
-        db.engins.forEach(e => { e.heures += 2; });
-        save();
+        const btn = document.getElementById('btn-iot-flux');
+        const statusText = document.getElementById('radar-status-text');
+        
+        if (!isIotActive) {
+            // Activer le flux IoT
+            isIotActive = true;
+            btn.classList.add('active');
+            btn.innerText = "⚡ Flux IoT Actif";
+            statusText.innerText = "Live";
+            statusText.style.color = "#10B981";
+
+            // Boucle d'actualisation en temps réel toutes les 1.5 secondes
+            iotFluxInterval = setInterval(() => {
+                db.engins.forEach(e => {
+                    // Les machines en marche bougent sur la carte
+                    if (e.statut === "Opérationnel") {
+                        // Variation de position aléatoire controlée entre -3% et +3%
+                        e.x = Math.max(10, Math.min(90, e.x + (Math.random() - 0.5) * 6));
+                        e.y = Math.max(10, Math.min(90, e.y + (Math.random() - 0.5) * 6));
+                        e.heures += 1; // Incrémentation logique des heures de vol moteur
+                    }
+                });
+                // Sauvegarde locale + re-render complet des composants graphiques
+                localStorage.setItem('snim_gmao_enterprise_v5', JSON.stringify(db));
+                renderApp();
+            }, 1500);
+
+        } else {
+            // Désactiver le flux IoT
+            isIotActive = false;
+            btn.classList.remove('active');
+            btn.innerText = "⚡ Activer Flux IoT GPS";
+            statusText.innerText = "Pause";
+            statusText.style.color = "";
+            
+            if (iotFluxInterval) {
+                clearInterval(iotFluxInterval);
+                iotFluxInterval = null;
+            }
+            renderApp(); // Rafraîchissement final sans animation active
+        }
     }
 
     mettreAJourStatutReseau();
